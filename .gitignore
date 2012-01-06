@@ -1,0 +1,8 @@
+.mymetadata
+.classpath
+.project
+.settings
+.myeclipse
+target
+src/main/webapp/WEB-INF/classes
+logs
