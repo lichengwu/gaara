@@ -7,4 +7,16 @@
 		<param-name>webAppRootKey</param-name>
 		<param-value>gaara</param-value>
 	</context-param>
+  <servlet>
+    <servlet-name>TestServlet</servlet-name>
+    <servlet-class>com.meituan.gaara.web.servlet.TestServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>TestServlet</servlet-name>
+    <url-pattern>/test</url-pattern>
+  </servlet-mapping>
+	<welcome-file-list>
+		<welcome-file>/index.jsp</welcome-file>
+	</welcome-file-list>
 </web-app>
