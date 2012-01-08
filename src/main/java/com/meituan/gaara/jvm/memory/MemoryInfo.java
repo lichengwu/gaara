@@ -13,13 +13,18 @@ import java.util.List;
 
 /**
  * 虚拟机内存信息
+ * <p>
+ * <b>注意:</b>
+ * {@link MemoryInfo}包含的内存信息只是
+ * {@link MemoryInfo#getInstance()}方法调用时候的瞬时信息。 如果需要动态监控内存，请适时调用
+ * {@link MemoryInfo#getInstance()}。
  * 
  * @author lichengwu
  * @created 2012-1-8
  * 
  * @version 1.0
  */
-public class MemoryInformation implements Serializable {
+public class MemoryInfo implements Serializable {
 
 	private static final long serialVersionUID = 5145204746778194464L;
 
@@ -93,11 +98,10 @@ public class MemoryInformation implements Serializable {
 	 */
 	private long maxNoHeapSize = -1;
 
-
 	/**
 	 * 构造方法
 	 */
-	private MemoryInformation() {
+	private MemoryInfo() {
 		memoryMXBean = ManagementFactory.getMemoryMXBean();
 		maxHeapSize = memoryMXBean.getHeapMemoryUsage().getMax();
 		usedHeapSize = memoryMXBean.getHeapMemoryUsage().getUsed();
@@ -107,8 +111,8 @@ public class MemoryInformation implements Serializable {
 
 	}
 
-	public static MemoryInformation getInstance() {
-		return new MemoryInformation();
+	public static MemoryInfo getInstance() {
+		return new MemoryInfo();
 	}
 
 	/**
@@ -236,25 +240,25 @@ public class MemoryInformation implements Serializable {
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-8
-	 *
+	 * 
 	 * @return 非堆已使用大小
 	 */
 	public long getUsedNoHeapMaxSize() {
-    	return usedNoHeapMaxSize;
-    }
+		return usedNoHeapMaxSize;
+	}
 
 	/**
 	 * 获得非堆最大值
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-8
-	 *
+	 * 
 	 * @return 非堆最大值
 	 */
 	public long getMaxNoHeapSize() {
-    	return maxNoHeapSize;
-    }
-	
+		return maxNoHeapSize;
+	}
+
 	/**
 	 * 初始化PoolMXBean
 	 * 
@@ -286,36 +290,36 @@ public class MemoryInformation implements Serializable {
 	}
 
 	/**
-     * @see java.lang.Object#toString()
-     */
-    @Override
-    public String toString() {
-	    StringBuilder builder = new StringBuilder();
-	    builder.append("MemoryInformation [maxHeapSize=");
-	    builder.append(maxHeapSize);
-	    builder.append(", usedHeapSize=");
-	    builder.append(usedHeapSize);
-	    builder.append(", maxPermGenSize=");
-	    builder.append(maxPermGenSize);
-	    builder.append(", usedPermGenSize=");
-	    builder.append(usedPermGenSize);
-	    builder.append(", maxEdenSize=");
-	    builder.append(maxEdenSize);
-	    builder.append(", usedEdenSize=");
-	    builder.append(usedEdenSize);
-	    builder.append(", maxSurvivorSize=");
-	    builder.append(maxSurvivorSize);
-	    builder.append(", usedSurvivorSize=");
-	    builder.append(usedSurvivorSize);
-	    builder.append(", maxOldGenSize=");
-	    builder.append(maxOldGenSize);
-	    builder.append(", usedOldGenSize=");
-	    builder.append(usedOldGenSize);
-	    builder.append(", maxNoHeapSize=");
-	    builder.append(maxNoHeapSize);
-	    builder.append(", usedNoHeapMaxSize=");
-	    builder.append(usedNoHeapMaxSize);
-	    builder.append("]");
-	    return builder.toString();
-    }
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("MemoryInformation [maxHeapSize=");
+		builder.append(maxHeapSize);
+		builder.append(", usedHeapSize=");
+		builder.append(usedHeapSize);
+		builder.append(", maxPermGenSize=");
+		builder.append(maxPermGenSize);
+		builder.append(", usedPermGenSize=");
+		builder.append(usedPermGenSize);
+		builder.append(", maxEdenSize=");
+		builder.append(maxEdenSize);
+		builder.append(", usedEdenSize=");
+		builder.append(usedEdenSize);
+		builder.append(", maxSurvivorSize=");
+		builder.append(maxSurvivorSize);
+		builder.append(", usedSurvivorSize=");
+		builder.append(usedSurvivorSize);
+		builder.append(", maxOldGenSize=");
+		builder.append(maxOldGenSize);
+		builder.append(", usedOldGenSize=");
+		builder.append(usedOldGenSize);
+		builder.append(", maxNoHeapSize=");
+		builder.append(maxNoHeapSize);
+		builder.append(", usedNoHeapMaxSize=");
+		builder.append(usedNoHeapMaxSize);
+		builder.append("]");
+		return builder.toString();
+	}
 }

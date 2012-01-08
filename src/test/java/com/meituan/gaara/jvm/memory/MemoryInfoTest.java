@@ -16,11 +16,12 @@ import org.junit.Test;
  * 
  * @version 1.0
  */
-public class MemoryInformationTest {
+public class MemoryInfoTest {
 
 	/**
 	 * JVM args : -XX:+UseConcMarkSweepGC -Xmx60m -Xms60m -Xmn15m
-	 * -XX:PermSize=20m -XX:MaxPermSize=20m -XX:MaxPermSize=20m -XX:SurvivorRatio=8
+	 * -XX:PermSize=20m -XX:MaxPermSize=20m -XX:MaxPermSize=20m
+	 * -XX:SurvivorRatio=8
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-8
@@ -28,18 +29,18 @@ public class MemoryInformationTest {
 	 */
 	@Test
 	public void test() {
-		MemoryInformation memoryInfo = MemoryInformation.getInstance();
+		MemoryInfo memoryInfo = MemoryInfo.getInstance();
 		Assert.assertNotNull(memoryInfo);
 		Assert.assertEquals(memoryInfo.getMaxPermGenSize(), 20 * 1024 * 1024);
-		//PermSize * SurvivorRatio
+		// PermSize * SurvivorRatio
 		Assert.assertEquals(memoryInfo.getMaxEdenSize(), 15 * 1024 * 1024 * 8 / 10);
-		//PermSize/10
+		// PermSize/10
 		Assert.assertEquals(memoryInfo.getMaxSurvivorSize(), 15 * 1024 * 1024 / 10);
-		//HeapSize - EdenSize - 2 * SurvivorSize
+		// HeapSize - EdenSize - 2 * SurvivorSize
 		Assert.assertEquals(memoryInfo.getMaxOldGenSize(), 45 * 1024 * 1024);
-		
-		Assert.assertTrue(memoryInfo.getMaxHeapSize()<60*1024*1024);
-		
+
+		Assert.assertTrue(memoryInfo.getMaxHeapSize() < 60 * 1024 * 1024);
+
 		System.out.println(memoryInfo.toString());
 	}
 
