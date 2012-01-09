@@ -28,7 +28,7 @@ public class GarbageCollectorHolderTest {
 	 */
 	@Test
 	public void testEmpty(){
-		GarbageCollectorHolder gcHolder = GarbageCollectorHolder.getInstance();
+		GarbageCollectorInfo gcHolder = GarbageCollectorInfo.getInstance();
 		for(GarbageCollector gc : gcHolder.describe()){
 			System.out.println(gc.toString());
 		}
@@ -45,7 +45,7 @@ public class GarbageCollectorHolderTest {
 	public void testWithGC(){
 		new Object();
 		System.gc();
-		GarbageCollectorHolder gcHolder = GarbageCollectorHolder.getInstance();
+		GarbageCollectorInfo gcHolder = GarbageCollectorInfo.getInstance();
 		for(GarbageCollector gc : gcHolder.describe()){
 			System.out.println(gc.toString());
 		}

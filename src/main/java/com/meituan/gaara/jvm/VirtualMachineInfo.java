@@ -14,6 +14,6 @@ package com.meituan.gaara.jvm;
  * 
  * @version 1.0
  */
-final public class VirtualMachine {
+final public class VirtualMachineInfo {
 	
 }

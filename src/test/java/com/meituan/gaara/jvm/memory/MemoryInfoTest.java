@@ -5,6 +5,9 @@
  */
 package com.meituan.gaara.jvm.memory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -42,6 +45,17 @@ public class MemoryInfoTest {
 		Assert.assertTrue(memoryInfo.getMaxHeapSize() < 60 * 1024 * 1024);
 
 		System.out.println(memoryInfo.toString());
+	}
+	
+	@Test
+	public void testRefresh(){
+		List<int []> list = new ArrayList<int[]>(0);
+		list.add(new int[1024*1024]);
+		MemoryInfo memoryInfo = MemoryInfo.getInstance();
+		System.out.println(memoryInfo);
+		list.add(new int[1024*1024]);
+		memoryInfo.refresh();
+		System.out.println(memoryInfo);
 	}
 
 }

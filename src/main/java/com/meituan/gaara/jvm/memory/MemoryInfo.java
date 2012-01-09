@@ -11,20 +11,23 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryPoolMXBean;
 import java.util.List;
 
+import com.meituan.gaara.info.TransientInfo;
+
 /**
  * 虚拟机内存信息
  * <p>
- * <b>注意:</b>
- * {@link MemoryInfo}包含的内存信息只是
- * {@link MemoryInfo#getInstance()}方法调用时候的瞬时信息。 如果需要动态监控内存，请适时调用
- * {@link MemoryInfo#getInstance()}。
+ * <b>注意:</b> {@link MemoryInfo}包含的内存信息只是 {@link MemoryInfo#getInstance()}
+ * 方法调用时候的瞬时信息。 如果需要动态监控内存，请适时调用 {@link MemoryInfo#getInstance()}或者
+ * {@link MemoryInfo#refresh()}。
+ * 
+ * @see TransientInfo
  * 
  * @author lichengwu
  * @created 2012-1-8
  * 
  * @version 1.0
  */
-public class MemoryInfo implements Serializable {
+public class MemoryInfo implements TransientInfo, Serializable {
 
 	private static final long serialVersionUID = 5145204746778194464L;
 
@@ -103,12 +106,8 @@ public class MemoryInfo implements Serializable {
 	 */
 	private MemoryInfo() {
 		memoryMXBean = ManagementFactory.getMemoryMXBean();
-		maxHeapSize = memoryMXBean.getHeapMemoryUsage().getMax();
-		usedHeapSize = memoryMXBean.getHeapMemoryUsage().getUsed();
-		maxNoHeapSize = memoryMXBean.getNonHeapMemoryUsage().getMax();
-		usedNoHeapMaxSize = memoryMXBean.getNonHeapMemoryUsage().getUsed();
 		initPoolMXBean();
-
+		load();
 	}
 
 	public static MemoryInfo getInstance() {
@@ -271,20 +270,12 @@ public class MemoryInfo implements Serializable {
 		for (MemoryPoolMXBean poolMXBean : memoryPoolMXBeans) {
 			if (poolMXBean.getName().contains("Eden")) {
 				edenPoolMXBean = poolMXBean;
-				maxEdenSize = edenPoolMXBean.getUsage().getMax();
-				usedEdenSize = edenPoolMXBean.getUsage().getUsed();
 			} else if (poolMXBean.getName().contains("Survivor")) {
 				survivorPoolMXBean = poolMXBean;
-				maxSurvivorSize = survivorPoolMXBean.getUsage().getMax();
-				usedSurvivorSize = survivorPoolMXBean.getUsage().getUsed();
 			} else if (poolMXBean.getName().contains("Old Gen")) {
 				oldGenPoolMXBean = poolMXBean;
-				maxOldGenSize = oldGenPoolMXBean.getUsage().getMax();
-				usedOldGenSize = oldGenPoolMXBean.getUsage().getUsed();
 			} else if (poolMXBean.getName().contains("Perm Gen")) {
 				permGenPoolMXBean = poolMXBean;
-				maxPermGenSize = permGenPoolMXBean.getUsage().getMax();
-				usedPermGenSize = permGenPoolMXBean.getUsage().getUsed();
 			}
 		}
 	}
@@ -321,5 +312,40 @@ public class MemoryInfo implements Serializable {
 		builder.append(usedNoHeapMaxSize);
 		builder.append("]");
 		return builder.toString();
+	}
+
+	/**
+	 * 刷新虚拟机内存信息。
+	 * 
+	 * @return 总是返回true
+	 * 
+	 * @see com.meituan.gaara.jvm.TransientInfo#refresh()
+	 */
+	@Override
+	public boolean refresh() {
+		load();
+		return true;
+	}
+
+	/**
+	 * 设置虚拟机内存参数
+	 * 
+	 * @author lichengwu
+	 * @created 2012-1-9
+	 * 
+	 */
+	private void load() {
+		maxHeapSize = memoryMXBean.getHeapMemoryUsage().getMax();
+		usedHeapSize = memoryMXBean.getHeapMemoryUsage().getUsed();
+		maxNoHeapSize = memoryMXBean.getNonHeapMemoryUsage().getMax();
+		usedNoHeapMaxSize = memoryMXBean.getNonHeapMemoryUsage().getUsed();
+		maxPermGenSize = permGenPoolMXBean.getUsage().getMax();
+		usedPermGenSize = permGenPoolMXBean.getUsage().getUsed();
+		maxOldGenSize = oldGenPoolMXBean.getUsage().getMax();
+		usedOldGenSize = oldGenPoolMXBean.getUsage().getUsed();
+		maxSurvivorSize = survivorPoolMXBean.getUsage().getMax();
+		usedSurvivorSize = survivorPoolMXBean.getUsage().getUsed();
+		maxEdenSize = edenPoolMXBean.getUsage().getMax();
+		usedEdenSize = edenPoolMXBean.getUsage().getUsed();
 	}
 }
