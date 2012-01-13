@@ -24,7 +24,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.meituan.gaara.info.TransientInfo;
-import com.meituan.gaara.jvm.GarbageCollectorAttribute;
 
 /**
  * JVM 垃圾回收器工具类，用于获得整个JVM的垃圾回收信息
@@ -141,7 +140,7 @@ final public class GarbageCollectorInfo implements TransientInfo, Serializable {
 					ObjectName on = new ObjectName("java.lang:type=GarbageCollector,name="
 					        + bean.getName());
 					String lastGcInfo = platformMBeanServer.getAttribute(on,
-					        GarbageCollectorAttribute.LASTGCINFO.getCode()).toString();
+					        GarbageCollector.Attribute.LASTGCINFO.getCode()).toString();
 					gc.setLastGcInfo(lastGcInfo);
 					gcList.add(gc);
 				}
