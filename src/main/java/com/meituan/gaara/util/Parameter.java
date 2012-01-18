@@ -36,7 +36,11 @@ public enum Parameter {
 	/**
 	 * 上下文路径
 	 */
-	CONTEXT_PATH("context_path");
+	CONTEXT_PATH("context_path"),
+	/**
+	 * 系统名称
+	 */
+	OS_NAME("os.name");
 
 	private String name;
 

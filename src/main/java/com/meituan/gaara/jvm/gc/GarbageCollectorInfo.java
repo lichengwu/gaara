@@ -57,14 +57,14 @@ final public class GarbageCollectorInfo implements TransientInfo, Serializable {
 	/**
 	 * 获得GarbageCollectorHolder实例
 	 * <p>
-	 * <b>注意：</b>{@link com.meituan.gaara.jvm.gc.GarbageCollectorInfo}
+	 * <b>注意：</b>{@link GarbageCollectorInfo}
 	 * 对象包含的垃圾收集器信息为调用 {@link #getInstance()}返回的瞬时静态信息。
 	 * 随着JVM内存不断变化，如果需要获得最新的JVM信息，请重新调用 {@link #getInstance()}获得新的实例。
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-8
 	 * 
-	 * @return {@link com.meituan.gaara.jvm.gc.GarbageCollectorInfo} 实例。
+	 * @return {@link GarbageCollectorInfo} 实例。
 	 */
 	public static GarbageCollectorInfo getInstance() {
 		return new GarbageCollectorInfo();
