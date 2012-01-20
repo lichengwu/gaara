@@ -46,7 +46,7 @@ public final class PID {
 	 * @return java进程id
 	 */
 	public static final String getPID() {
-		String pid = System.getProperty("pid");
+		String pid = ParameterUtil.getParameter(Parameter.PID);
 		if (pid == null) {
 			RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
 			String processName = runtimeMXBean.getName();
@@ -55,7 +55,7 @@ public final class PID {
 			} else {
 				pid = getPIDFromOS();
 			}
-			System.setProperty("pid", pid);
+			System.setProperty(Parameter.PID.getName(), pid);
 		}
 		return pid;
 	}
@@ -67,7 +67,7 @@ public final class PID {
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-18
-	 *
+	 * 
 	 * @return
 	 */
 	private static String getPIDFromOS() {

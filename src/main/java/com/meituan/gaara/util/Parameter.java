@@ -32,7 +32,7 @@ public enum Parameter {
 	 * 当前应用名字
 	 */
 	WEB_APPLICATION_NAME("web_application_name"),
-	
+
 	/**
 	 * 上下文路径
 	 */
@@ -40,7 +40,12 @@ public enum Parameter {
 	/**
 	 * 系统名称
 	 */
-	OS_NAME("os.name");
+	OS_NAME("os.name"),
+
+	/**
+	 * PID
+	 */
+	PID("java_pid");
 
 	private String name;
 

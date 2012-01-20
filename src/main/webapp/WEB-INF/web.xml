@@ -11,10 +11,19 @@
     <servlet-name>TestServlet</servlet-name>
     <servlet-class>com.meituan.gaara.web.servlet.TestServlet</servlet-class>
   </servlet>
+  <servlet>
+    <servlet-name>MonitoringServlet</servlet-name>
+    <servlet-class>com.meituan.gaara.web.servlet.MonitoringServlet</servlet-class>
+  </servlet>
+
 
   <servlet-mapping>
     <servlet-name>TestServlet</servlet-name>
     <url-pattern>/test</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>CollectorServlet</servlet-name>
+    <url-pattern>/monitoring</url-pattern>
   </servlet-mapping>
 	<welcome-file-list>
 		<welcome-file>/index.jsp</welcome-file>
