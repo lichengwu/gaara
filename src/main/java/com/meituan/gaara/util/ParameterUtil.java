@@ -141,6 +141,11 @@ final public class ParameterUtil implements Serializable {
 	 * @return 资源文件位置
 	 */
 	public static String getResourcePath(String fileName) {
+		assert fileName != null;
+		assert fileName.length() > 1;
+		if (fileName.startsWith("/")) {
+			fileName = fileName.substring(1);
+		}
 		return ParameterUtil.class.getResource("/com/meituan/gaara/resources/" + fileName)
 		        .getFile();
 	}
@@ -188,12 +193,12 @@ final public class ParameterUtil implements Serializable {
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-13
-	 *
+	 * 
 	 */
 	private static void initLocalInfo() {
-		//主机名字
+		// 主机名字
 		String hostName = null;
-		//主机地址
+		// 主机地址
 		String hostAddress = null;
 		try {
 			hostName = InetAddress.getLocalHost().getHostName();
