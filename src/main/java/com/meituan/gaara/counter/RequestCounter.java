@@ -165,7 +165,8 @@ public class RequestCounter implements Counter, Cloneable, Serializable {
 	 */
 	@Override
 	public Object clone() throws CloneNotSupportedException {
-		return super.clone();
+		Object clone = super.clone();
+		return clone;
 	}
 
 	/**

@@ -41,6 +41,16 @@ public enum Parameter {
 	 * 系统名称
 	 */
 	OS_NAME("os.name"),
+	
+	/**
+	 * gaara文件存储路径
+	 */
+	STORAGE_DIRECTORY("storage_directory"),
+	
+	/**
+	 * 收集频率
+	 */
+	COLLECT_RATE("gaara.collect_rate"),
 
 	/**
 	 * PID

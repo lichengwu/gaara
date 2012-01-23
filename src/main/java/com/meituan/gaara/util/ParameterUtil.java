@@ -31,6 +31,8 @@ final public class ParameterUtil implements Serializable {
 
 	private static Properties properties = new Properties();
 
+	private static final String DEFAULT_DIR = "gaara";
+
 	private static ServletContext servletContext = null;
 
 	/**
@@ -93,6 +95,21 @@ final public class ParameterUtil implements Serializable {
 			}
 		}
 		return null;
+	}
+	
+	/**
+	 * 将参数转换成int
+	 * <p>
+	 * 参考:{@link ParameterUtil#getParameter(Parameter)}
+	 * 
+	 * @author lichengwu
+	 * @created 2012-1-22
+	 *
+	 * @param parameter
+	 * @return
+	 */
+	public static int getParameterAsInt(Parameter parameter){
+		return Integer.valueOf(getParameter(parameter));
 	}
 
 	/**
@@ -212,6 +229,37 @@ final public class ParameterUtil implements Serializable {
 		if (hostAddress != null) {
 			properties.put(Parameter.HOST_ADDRESS.getName(), hostAddress);
 		}
+	}
+
+	/**
+	 * 获得gaara文件存储路径
+	 * 
+	 * @author lichengwu
+	 * @created 2012-1-22
+	 *
+	 * @param application 应用名字
+	 * @return 获得gaara文件存储路径
+	 */
+	public static File getStorageDirectory(String application) {
+		String dir = ParameterUtil.getParameter(Parameter.STORAGE_DIRECTORY);
+		if (dir == null) {
+			dir = DEFAULT_DIR;
+		}
+		String absolutePath;
+		// 绝对路径处理
+		if (FileUtil.isAbsolute(dir)) {
+			absolutePath = dir;
+		}
+		// 相对路径处理
+		else {
+			absolutePath = FileUtil.TEMP_DIR.getPath() + File.separator + dir;
+		}
+		//web app
+		if (servletContext != null) {
+			return new File(absolutePath + File.separator + application);
+		}
+		//非web app 获得  servletContext==null
+		return new File(absolutePath);
 	}
 
 	/**
