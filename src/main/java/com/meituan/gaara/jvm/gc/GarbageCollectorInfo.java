@@ -111,7 +111,6 @@ final public class GarbageCollectorInfo implements TransientInfo, Serializable {
 	 * @return 如果能获得到垃圾收集器信息(即垃圾收集器可用)，然后true；否则返回false。
 	 * @see com.meituan.gaara.info.TransientInfo#refresh()
 	 */
-	@Override
 	public boolean refresh() {
 		obtainGcInfo();
 		return gcList.size() > 0;

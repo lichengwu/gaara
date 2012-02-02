@@ -22,7 +22,6 @@ final public class VirtualMachineInfo implements TransientInfo,Serializable {
 
     private static final long serialVersionUID = 4145011994188568350L;
 
-	@Override
     public boolean refresh() {
 	    return false;
     }

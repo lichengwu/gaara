@@ -6,10 +6,15 @@
 package com.meituan.gaara.store;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.GradientPaint;
 import java.awt.Paint;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.Calendar;
+import java.util.Locale;
+import java.util.Timer;
 
 import org.jrobin.core.ConsolFuns;
 import org.jrobin.core.DsTypes;
@@ -17,12 +22,18 @@ import org.jrobin.core.RrdDb;
 import org.jrobin.core.RrdDbPool;
 import org.jrobin.core.RrdDef;
 import org.jrobin.core.RrdException;
+import org.jrobin.core.RrdNioBackend;
 import org.jrobin.core.Util;
-import org.jrobin.core.jrrd.DataSourceType;
+import org.jrobin.graph.RrdGraph;
+import org.jrobin.graph.RrdGraphDef;
 
+import com.meituan.gaara.exception.GaaraException;
 import com.meituan.gaara.util.FileUtil;
+import com.meituan.gaara.util.I18N;
 import com.meituan.gaara.util.Parameter;
 import com.meituan.gaara.util.ParameterUtil;
+import com.meituan.gaara.util.ReflectUtil;
+import com.meituan.gaara.util.TimeRange;
 
 /**
  * 采用JRobin存储数据在RRD(Round Robin Database)。
@@ -140,14 +151,200 @@ public final class JRobin {
 			// 一年（两天合并一次）
 			rrdDef.addArchive(ConsolFuns.CF_AVERAGE, 0.5, 2 * 24 * DAY / step, 15 * 12);
 			rrdDef.addArchive(ConsolFuns.CF_MAX, 0.5, 2 * 24 * DAY / step, 15 * 12);
-			
+
 			RrdDb rrdDb = rrdPool.requestRrdDb(rrdDef);
 			rrdPool.release(rrdDb);
 		}
 	}
-	
-	public byte[] paint(){
-		return null;
+
+	/**
+	 * 重置RRD文件
+	 * 
+	 * @author lichengwu
+	 * @created 2012-1-31
+	 * 
+	 * @throws RrdException
+	 * @throws IOException
+	 */
+	public void resetFile() throws RrdException, IOException {
+		FileUtil.delete(rrdFileName);
+		try {
+			init();
+		} catch (final RrdException e) {
+			throw e;
+		}
+	}
+
+	/**
+	 * 绘图
+	 * 
+	 * @author lichengwu
+	 * @created 2012-1-31
+	 * 
+	 * @param range
+	 *            时间范围
+	 * @param width
+	 *            宽度
+	 * @param height
+	 *            高度
+	 * @return 图片的二进制表示
+	 * @throws IOException
+	 * @throws RrdException
+	 */
+	public byte[] graph(TimeRange range, int width, int height) throws IOException, RrdException {
+		try {
+			// create common part of graph definition
+			final RrdGraphDef graphDef = new RrdGraphDef();
+			// 中文
+			if (Locale.CHINESE.getLanguage().equals(
+			        I18N.getResourceBundle().getLocale().getLanguage())) {
+				graphDef.setSmallFont(new Font(Font.MONOSPACED, Font.PLAIN, 10));
+				graphDef.setLargeFont(new Font(Font.MONOSPACED, Font.BOLD, 12));
+			}
+
+			setGraphSource(graphDef, height);
+			setGraphPeriodAndSize(range, width, height, graphDef);
+
+			graphDef.setImageFormat("png");
+			graphDef.setFilename("-");
+			graphDef.setPoolUsed(true);
+			return new RrdGraph(graphDef).getRrdGraphInfo().getBytes();
+		} catch (final RrdException e) {
+			throw e;
+		}
+	}
+
+	/**
+	 * 设置图像时间范围和大小
+	 * 
+	 * @author lichengwu
+	 * @created 2012-1-31
+	 * 
+	 * @param range
+	 *            时间范围
+	 * @param width
+	 *            宽度
+	 * @param height
+	 *            高度
+	 * @param graphDef
+	 */
+	private void setGraphPeriodAndSize(TimeRange range, int width, int height, RrdGraphDef graphDef) {
+		long endTime;
+		long startTime;
+		if (range.getPeriod() == null) {
+			// 结束时间不能超过当前时间
+			endTime = Math.min(range.getEndDate().getTime() / 1000, Util.getTime());
+			startTime = range.getStartDate().getTime() / 1000;
+		} else {
+			endTime = Util.getTime();
+			startTime = endTime - range.getPeriod().getDurationSeconds();
+		}
+		String label = getLabel();
+
+		// 设置图像标签头
+		String titleStart;
+		if (label.length() > 31 && width <= 200) {
+			titleStart = label;
+		} else {
+			titleStart = label + " - " + range.getLabel();
+		}
+		// 设置图像标签尾
+		String titleEnd;
+		if (width > 400) {
+			if (range.getPeriod() == null) {
+				titleEnd = " - " + I18N.getFormattedString("sur", application);
+			} else {
+				titleEnd = " - " + I18N.getCurrentDate() + ' '
+				        + I18N.getFormattedString("sur", application);
+			}
+		} else {
+			titleEnd = "";
+			if (range.getPeriod() == null) {
+				graphDef.setLargeFont(graphDef.getLargeFont().deriveFont(
+				        graphDef.getLargeFont().getSize2D() - 2f));
+			}
+		}
+		graphDef.setStartTime(startTime);
+		graphDef.setEndTime(endTime);
+		graphDef.setTitle(titleStart + titleEnd);
+		graphDef.setFirstDayOfWeek(Calendar.getInstance(I18N.getCurrentLocale())
+		        .getFirstDayOfWeek());
+
+		// User defined locale in graphics:
+		// 参见:https://sourceforge.net/tracker/?func=detail&aid=3403733&group_id=82668&atid=566807
+		// graphDef.setLocale(I18N.getCurrentLocale());
+
+		// 设置图片宽高
+		graphDef.setWidth(width);
+		graphDef.setHeight(height);
+		// 小图去掉辅助说明
+		if (width <= 100) {
+			graphDef.setNoLegend(true);
+			graphDef.setUnitsLength(0);
+			graphDef.setShowSignature(false);
+			graphDef.setTitle(null);
+		}
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	/**
+	 * 获得显示标签
+	 * 
+	 * @author lichengwu
+	 * @created 2012-2-2
+	 *
+	 * @return
+	 */
+	public String getLabel() {
+		if (requestName == null) {
+			return I18N.getString(name);
+		}
+		final String shortRequestName = requestName
+		        .substring(0, Math.min(30, requestName.length()));
+		return I18N.getFormattedString("Temps_moyens_de", shortRequestName);
+	}
+
+	/**
+	 * 设置数据源
+	 * 
+	 * @author lichengwu
+	 * @created 2012-2-2
+	 *
+	 * @param graphDef {@link RrdGraphDef}
+	 * @param height 高度
+	 */
+	private void setGraphSource(RrdGraphDef graphDef, int height) {
+		final String average = "average";
+		final String max = "max";
+		final String dataSourceName = getDataSourceName();
+		graphDef.datasource(average, rrdFileName, dataSourceName, "AVERAGE");
+		graphDef.datasource(max, rrdFileName, dataSourceName, "MAX");
+		graphDef.setMinValue(0);
+		final String moyenneLabel = I18N.getString("Moyenne");
+		final String maximumLabel = I18N.getString("Maximum");
+		graphDef.area(average, getPaint(height), moyenneLabel);
+		graphDef.line(max, Color.BLUE, maximumLabel);
+		graphDef.gprint(average, "AVERAGE", moyenneLabel + ": %9.0f %S\\r");
+		graphDef.gprint(max, "MAX", maximumLabel + ": %9.0f %S\\r");
+	}
+
+	/**
+	 * 根据图像高度获得显色模式定义
+	 * 
+	 * @author lichengwu
+	 * @created 2012-2-2
+	 *
+	 * @param height 图像高度
+	 * @return 颜色模式
+	 */
+	private Paint getPaint(int height) {
+		if (height == TINY_HEIGHT) {
+			return SMALL_GRADIENT;
+		}
+		return new GradientPaint(0, 0, BRIGHT_RED, 0, height, Color.GREEN, false);
 	}
 
 	/**
@@ -165,6 +362,43 @@ public final class JRobin {
 			return name;
 		}
 		return name.substring(0, 20);
+	}
+
+	/**
+	 * 停止存储数据
+	 * 
+	 * @author lichengwu
+	 * @throws GaaraException
+	 * @created 2012-1-31
+	 * 
+	 * @throws GaaraException
+	 */
+	public void stop() throws GaaraException {
+		try {
+			getJRobinFileSyncTimer().cancel();
+		} catch (Throwable e) {
+			throw new GaaraException(e);
+		}
+	}
+
+	/**
+	 * 获得JRobin的文件同步定时器
+	 * 
+	 * @author lichengwu
+	 * @created 2012-1-31
+	 * 
+	 * @return
+	 * @throws IOException
+	 * @throws SecurityException
+	 * @throws NoSuchFieldException
+	 * @throws IllegalArgumentException
+	 * @throws IllegalAccessException
+	 */
+	private Timer getJRobinFileSyncTimer() throws IOException, SecurityException,
+	        NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+		final Field field = RrdNioBackend.class.getDeclaredField("fileSyncTimer");
+		ReflectUtil.setFieldAccessible(field);
+		return (Timer) field.get(null);
 	}
 
 }

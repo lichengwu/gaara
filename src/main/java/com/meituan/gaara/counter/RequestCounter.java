@@ -85,7 +85,6 @@ public class RequestCounter implements Counter, Cloneable, Serializable {
 	/**
 	 * @see com.meituan.gaara.counter.Counter#add(com.meituan.gaara.counter.Counter)
 	 */
-	@Override
 	public void add(Counter counter) {
 		RequestCounter requestCounter = (RequestCounter) counter;
 		if (requestCounter.getHits() > 0) {

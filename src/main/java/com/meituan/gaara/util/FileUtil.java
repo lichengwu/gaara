@@ -45,7 +45,8 @@ final public class FileUtil {
 	 * @author lichengwu
 	 * @created 2012-1-22
 	 * 
-	 * @param path 文件路径
+	 * @param path
+	 *            文件路径
 	 * @return 如果path是一个路径，并且能够创建创建，返回true；否则返回false
 	 */
 	public static boolean ensureFilePath(File path) {
@@ -58,11 +59,25 @@ final public class FileUtil {
 	 * @author lichengwu
 	 * @created 2012-1-22
 	 * 
-	 * @param path 文件路径
+	 * @param path
+	 *            文件路径
 	 * @return 如果path是一个路径，并且能够创建创建，返回true；否则返回false
 	 */
 	public static boolean ensureFilePath(String path) {
 		return ensureFilePath(new File(path));
+	}
+
+	/**
+	 * 删除
+	 * 
+	 * @author lichengwu
+	 * @created 2012-1-31
+	 *
+	 * @param path 文件或目录的对路径
+	 * @return 文件或目录删除成功返回true，否则返回false
+	 */
+	public static boolean delete(String path) {
+		return new File(path).delete();
 	}
 
 	public static void main(String[] args) {

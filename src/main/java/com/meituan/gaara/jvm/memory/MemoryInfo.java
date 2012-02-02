@@ -321,7 +321,6 @@ public class MemoryInfo implements TransientInfo, Serializable {
 	 * 
 	 * @see com.meituan.gaara.jvm.TransientInfo#refresh()
 	 */
-	@Override
 	public boolean refresh() {
 		load();
 		return true;

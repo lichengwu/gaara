@@ -51,6 +51,11 @@ public enum Parameter {
 	 * 收集频率
 	 */
 	COLLECT_RATE("gaara.collect_rate"),
+	
+	/**
+	 * java版本号
+	 */
+	JAVA_VERSION("java.version"),
 
 	/**
 	 * PID

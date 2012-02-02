@@ -18,6 +18,7 @@ import org.apache.commons.logging.LogFactory;
 /**
  * Garra系统参数
  * 
+ * 
  * @author lichengwu
  * @created 2012-1-9
  * 
@@ -64,6 +65,7 @@ final public class ParameterUtil implements Serializable {
 
 	/**
 	 * 获得参数值
+	 * TODO 参数读取循序应该变换一下：2,1,3
 	 * <p>
 	 * <b>读取参数顺序:</b><br />
 	 * 1.{@link System#getProperty(String)}<br />
@@ -192,7 +194,6 @@ final public class ParameterUtil implements Serializable {
 		File file = new File(getConfigPath());
 		File[] configFiles = file.listFiles(new FilenameFilter() {
 			// 所有配置文件
-			@Override
 			public boolean accept(File dir, String name) {
 				return name.endsWith(".properties");
 			}
