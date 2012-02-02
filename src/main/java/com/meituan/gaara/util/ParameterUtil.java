@@ -21,8 +21,9 @@ import org.apache.commons.logging.LogFactory;
  * 
  * @author lichengwu
  * @created 2012-1-9
+ * @modified 2012-2-2
  * 
- * @version 1.0
+ * @version 1.1
  */
 final public class ParameterUtil implements Serializable {
 
@@ -52,6 +53,7 @@ final public class ParameterUtil implements Serializable {
 	 * @param context
 	 */
 	public static void initialize(ServletContext context) {
+		log.info("start init param...");
 		servletContext = context;
 		try {
 			readProperties();
@@ -61,56 +63,60 @@ final public class ParameterUtil implements Serializable {
 		} catch (IOException e) {
 			log.error(e.getMessage(), e);
 		}
+		log.info("finish init param...");
 	}
 
 	/**
 	 * 获得参数值
-	 * TODO 参数读取循序应该变换一下：2,1,3
 	 * <p>
 	 * <b>读取参数顺序:</b><br />
-	 * 1.{@link System#getProperty(String)}<br />
-	 * 2.com/meituan/gaara/conf下所有properties文件<br />
-	 * 3.如果 {@link #getServletContext()}不为空，读取
-	 * {@link ServletContext#getInitParameter(String)}<br />
+	 * 1.com/meituan/gaara/conf下所有properties文件。<br />
+	 * 2.读取{@link ServletContext#getInitParameter(String)}。<br />
+	 * 3.{@link System#getProperty(String)}。
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-13
 	 * 
 	 * @param parameter
-	 * @return
+	 *            参数
+	 * @return 参数值(字符串)
 	 */
 	public static String getParameter(Parameter parameter) {
 		assert parameter != null;
 		String name = parameter.getName();
-		String value = System.getProperty(name);
+		// 1.com/meituan/gaara/conf下所有properties文件读取
+		String value = properties.getProperty(name);
 		if (value != null) {
 			return value;
 		}
-		value = properties.getProperty(name);
-		if (value != null) {
-			return value;
-		}
+		// 2.如果 servletContext不为空，读取初始化参数
 		if (servletContext != null) {
 			value = servletContext.getInitParameter(name);
 			if (value != null) {
 				return value;
 			}
 		}
+		// 3.从系统读取
+		value = System.getProperty(name);
+		if (value != null) {
+			return value;
+		}
 		return null;
 	}
-	
+
 	/**
-	 * 将参数转换成int
+	 * 获得数字形式参数值
 	 * <p>
-	 * 参考:{@link ParameterUtil#getParameter(Parameter)}
+	 * 参考:{@link ParameterUtil#getParameter(Parameter)}。·
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-22
-	 *
+	 * 
 	 * @param parameter
-	 * @return
+	 *            参数
+	 * @return 数字
 	 */
-	public static int getParameterAsInt(Parameter parameter){
+	public static int getParameterAsInt(Parameter parameter) {
 		return Integer.valueOf(getParameter(parameter));
 	}
 
@@ -118,35 +124,53 @@ final public class ParameterUtil implements Serializable {
 	 * 获得参数值
 	 * <p>
 	 * <b>读取参数顺序:</b><br />
-	 * 1.{@link System#getProperty(String)}<br />
-	 * 2.com/meituan/gaara/conf下所有properties文件<br />
-	 * 3.如果 {@link #getServletContext()}不为空，读取
-	 * {@link ServletContext#getInitParameter(String)}<br />
+	 * 1.com/meituan/gaara/conf下所有properties文件。<br />
+	 * 2.读取{@link ServletContext#getInitParameter(String)}。<br />
+	 * 3.{@link System#getProperty(String)}。
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-13
 	 * 
 	 * @param name
-	 *            参数名字
-	 * @return
+	 *            参数
+	 * @return 参数值(字符串)
 	 */
 	public static String getParameter(String name) {
 		assert name != null;
-		String value = System.getProperty(name);
+		// 1.com/meituan/gaara/conf下所有properties文件读取
+		String value = properties.getProperty(name);
 		if (value != null) {
 			return value;
 		}
-		value = properties.getProperty(name);
-		if (value != null) {
-			return value;
-		}
+		// 2.如果 servletContext不为空，读取初始化参数
 		if (servletContext != null) {
 			value = servletContext.getInitParameter(name);
 			if (value != null) {
 				return value;
 			}
 		}
+		// 3.从系统读取
+		value = System.getProperty(name);
+		if (value != null) {
+			return value;
+		}
 		return null;
+	}
+
+	/**
+	 * 获得数字形式参数值
+	 * <p>
+	 * 参考:{@link ParameterUtil#getParameter(Parameter)}。·
+	 * 
+	 * @author lichengwu
+	 * @created 2012-1-22
+	 * 
+	 * @param name
+	 *            参数名字
+	 * @return 数字
+	 */
+	public static int getParameterAsInt(String name) {
+		return Integer.valueOf(getParameter(name));
 	}
 
 	/**
@@ -201,9 +225,44 @@ final public class ParameterUtil implements Serializable {
 		// 读取配置文件
 		if (configFiles != null && configFiles.length > 0) {
 			for (File configFile : configFiles) {
+				log.info("read properties from file:" + configFile.getCanonicalPath());
 				properties.load(new FileReader(configFile));
 			}
 		}
+	}
+
+	/**
+	 * 设置参数
+	 * 
+	 * @author lichengwu
+	 * @created 2012-2-2
+	 * 
+	 * @param name
+	 *            参数名
+	 * @param value
+	 *            参数值
+	 */
+	public static void setParameter(String name, Object value) {
+		assert name != null;
+		assert value != null;
+		properties.put(name, value);
+	}
+
+	/**
+	 * 设置参数
+	 * 
+	 * @author lichengwu
+	 * @created 2012-2-2
+	 * 
+	 * @param parameter
+	 *            参数
+	 * @param value
+	 *            参数值
+	 */
+	public static void setParameter(Parameter parameter, Object value) {
+		assert parameter != null;
+		assert value != null;
+		properties.put(parameter.getName(), value);
 	}
 
 	/**
@@ -226,9 +285,11 @@ final public class ParameterUtil implements Serializable {
 		}
 		if (hostName != null) {
 			properties.put(Parameter.HOST_NAME.getName(), hostName);
+			log.info("get host name:" + hostName);
 		}
 		if (hostAddress != null) {
 			properties.put(Parameter.HOST_ADDRESS.getName(), hostAddress);
+			log.info("get host address:" + hostAddress);
 		}
 	}
 
@@ -237,8 +298,9 @@ final public class ParameterUtil implements Serializable {
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-22
-	 *
-	 * @param application 应用名字
+	 * 
+	 * @param application
+	 *            应用名字
 	 * @return 获得gaara文件存储路径
 	 */
 	public static File getStorageDirectory(String application) {
@@ -255,11 +317,11 @@ final public class ParameterUtil implements Serializable {
 		else {
 			absolutePath = FileUtil.TEMP_DIR.getPath() + File.separator + dir;
 		}
-		//web app
+		// web app
 		if (servletContext != null) {
 			return new File(absolutePath + File.separator + application);
 		}
-		//非web app 获得  servletContext==null
+		// 非web app 获得 servletContext==null
 		return new File(absolutePath);
 	}
 

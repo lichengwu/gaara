@@ -55,7 +55,8 @@ public final class PID {
 			} else {
 				pid = getPIDFromOS();
 			}
-			System.setProperty(Parameter.PID.getName(), pid);
+			//缓存
+			ParameterUtil.setParameter(Parameter.PID, pid);
 		}
 		return pid;
 	}
