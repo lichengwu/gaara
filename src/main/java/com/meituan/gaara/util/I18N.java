@@ -31,7 +31,7 @@ final public class I18N {
 	/**
 	 * 资源包路径
 	 */
-	private static final String RESOURCE_BUNDLE_BASE_PATH = ParameterUtil.getResourcePath("lang")
+	private static final String RESOURCE_BUNDLE_BASE_PATH = FileUtil.getResourcePath("lang")
 	        + "/language";
 	/**
 	 * 当前线程的loacal

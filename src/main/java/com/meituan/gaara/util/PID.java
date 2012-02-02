@@ -88,7 +88,7 @@ public final class PID {
 			try {
 				// 创建临时getpids.exe文件
 				tempFile = File.createTempFile("getpids", ".exe");
-				File getpids = new File(ParameterUtil.getResourcePath("getpids.exe"));
+				File getpids = new File(FileUtil.getResourcePath("getpids.exe"));
 				fis = new FileInputStream(getpids);
 				fos = new FileOutputStream(tempFile);
 				byte[] buf = new byte[1024];

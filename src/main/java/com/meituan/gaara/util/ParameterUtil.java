@@ -33,8 +33,6 @@ final public class ParameterUtil implements Serializable {
 
 	private static Properties properties = new Properties();
 
-	private static final String DEFAULT_DIR = "gaara";
-
 	private static ServletContext servletContext = null;
 
 	/**
@@ -58,6 +56,7 @@ final public class ParameterUtil implements Serializable {
 		try {
 			readProperties();
 			initLocalInfo();
+			PID.getPID();
 		} catch (FileNotFoundException e) {
 			log.error(e.getMessage(), e);
 		} catch (IOException e) {
@@ -174,38 +173,6 @@ final public class ParameterUtil implements Serializable {
 	}
 
 	/**
-	 * 获得资源的路径
-	 * 
-	 * @author lichengwu
-	 * @created 2012-1-13
-	 * 
-	 * @param fileName
-	 *            文件名
-	 * @return 资源文件位置
-	 */
-	public static String getResourcePath(String fileName) {
-		assert fileName != null;
-		assert fileName.length() > 1;
-		if (fileName.startsWith("/")) {
-			fileName = fileName.substring(1);
-		}
-		return ParameterUtil.class.getResource("/com/meituan/gaara/resources/" + fileName)
-		        .getFile();
-	}
-
-	/**
-	 * 获得配置文件的路径
-	 * 
-	 * @author lichengwu
-	 * @created 2012-1-13
-	 * 
-	 * @return 配置文件的路径
-	 */
-	private static String getConfigPath() {
-		return ParameterUtil.class.getResource("/com/meituan/gaara/conf/").getFile();
-	}
-
-	/**
 	 * 读取配置文件
 	 * 
 	 * @author lichengwu
@@ -215,7 +182,7 @@ final public class ParameterUtil implements Serializable {
 	 * @throws IOException
 	 */
 	private static void readProperties() throws FileNotFoundException, IOException {
-		File file = new File(getConfigPath());
+		File file = new File(FileUtil.getConfigPath());
 		File[] configFiles = file.listFiles(new FilenameFilter() {
 			// 所有配置文件
 			public boolean accept(File dir, String name) {
@@ -294,38 +261,6 @@ final public class ParameterUtil implements Serializable {
 	}
 
 	/**
-	 * 获得gaara文件存储路径
-	 * 
-	 * @author lichengwu
-	 * @created 2012-1-22
-	 * 
-	 * @param application
-	 *            应用名字
-	 * @return 获得gaara文件存储路径
-	 */
-	public static File getStorageDirectory(String application) {
-		String dir = ParameterUtil.getParameter(Parameter.STORAGE_DIRECTORY);
-		if (dir == null) {
-			dir = DEFAULT_DIR;
-		}
-		String absolutePath;
-		// 绝对路径处理
-		if (FileUtil.isAbsolute(dir)) {
-			absolutePath = dir;
-		}
-		// 相对路径处理
-		else {
-			absolutePath = FileUtil.TEMP_DIR.getPath() + File.separator + dir;
-		}
-		// web app
-		if (servletContext != null) {
-			return new File(absolutePath + File.separator + application);
-		}
-		// 非web app 获得 servletContext==null
-		return new File(absolutePath);
-	}
-
-	/**
 	 * @return the servletContext
 	 */
 	public static ServletContext getServletContext() {
@@ -338,11 +273,4 @@ final public class ParameterUtil implements Serializable {
 	public static void setServletContext(ServletContext servletContext) {
 		ParameterUtil.servletContext = servletContext;
 	}
-
-	public static void main(String[] args) throws IOException {
-		ParameterUtil.initialize(null);
-		System.out.println(ParameterUtil.getParameter("java.version"));
-		;
-	}
-
 }

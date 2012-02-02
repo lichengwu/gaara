@@ -113,7 +113,7 @@ public final class JRobin {
 	 */
 	public static JRobin createInstance(String application, String name, String requestName)
 	        throws RrdException, IOException {
-		File rrdStorageDir = ParameterUtil.getStorageDirectory(application);
+		File rrdStorageDir = FileUtil.getStorageDirectory(application);
 		File rrdFile = new File(rrdStorageDir, name + ".rrd");
 		int step = ParameterUtil.getParameterAsInt(Parameter.COLLECT_RATE);
 		return new JRobin(application, name, rrdFile, step, requestName);

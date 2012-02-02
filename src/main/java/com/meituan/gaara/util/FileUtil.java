@@ -22,6 +22,8 @@ final public class FileUtil {
 	 */
 	public static File TEMP_DIR = new File(System.getProperty("java.io.tmpdir"));
 
+	private static final String DEFAULT_DIR = "gaara";
+
 	/**
 	 * 判断路径是否是绝对路径
 	 * 
@@ -72,12 +74,76 @@ final public class FileUtil {
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-31
-	 *
-	 * @param path 文件或目录的对路径
+	 * 
+	 * @param path
+	 *            文件或目录的对路径
 	 * @return 文件或目录删除成功返回true，否则返回false
 	 */
 	public static boolean delete(String path) {
 		return new File(path).delete();
+	}
+
+	/**
+	 * 获得gaara文件存储路径
+	 * 
+	 * @author lichengwu
+	 * @created 2012-1-22
+	 * 
+	 * @param application
+	 *            应用名字
+	 * @return 获得gaara文件存储路径
+	 */
+	public static File getStorageDirectory(String application) {
+		String dir = ParameterUtil.getParameter(Parameter.STORAGE_DIRECTORY);
+		if (dir == null) {
+			dir = DEFAULT_DIR;
+		}
+		String absolutePath;
+		// 绝对路径处理
+		if (FileUtil.isAbsolute(dir)) {
+			absolutePath = dir;
+		}
+		// 相对路径处理
+		else {
+			absolutePath = FileUtil.TEMP_DIR.getPath() + File.separator + dir;
+		}
+		// web app
+		if (ParameterUtil.getServletContext() != null) {
+			return new File(absolutePath + File.separator + application);
+		}
+		// 非web app 获得 servletContext==null
+		return new File(absolutePath);
+	}
+
+	/**
+	 * 获得资源的路径
+	 * 
+	 * @author lichengwu
+	 * @created 2012-1-13
+	 * 
+	 * @param fileName
+	 *            文件名
+	 * @return 资源文件位置
+	 */
+	public static String getResourcePath(String fileName) {
+		assert fileName != null;
+		assert fileName.length() > 1;
+		if (fileName.startsWith("/")) {
+			fileName = fileName.substring(1);
+		}
+		return FileUtil.class.getResource("/com/meituan/gaara/resources/" + fileName).getFile();
+	}
+
+	/**
+	 * 获得配置文件的路径
+	 * 
+	 * @author lichengwu
+	 * @created 2012-1-13
+	 * 
+	 * @return 配置文件的路径
+	 */
+	public static String getConfigPath() {
+		return FileUtil.class.getResource("/com/meituan/gaara/conf/").getFile();
 	}
 
 	public static void main(String[] args) {
