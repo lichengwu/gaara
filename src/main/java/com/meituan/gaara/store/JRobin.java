@@ -23,6 +23,7 @@ import org.jrobin.core.RrdDbPool;
 import org.jrobin.core.RrdDef;
 import org.jrobin.core.RrdException;
 import org.jrobin.core.RrdNioBackend;
+import org.jrobin.core.Sample;
 import org.jrobin.core.Util;
 import org.jrobin.graph.RrdGraph;
 import org.jrobin.graph.RrdGraphDef;
@@ -61,7 +62,7 @@ public final class JRobin {
 	private String name;
 	private String rrdFileName;
 	private int step;
-	private String requestName;
+	private String label;
 
 	/**
 	 * 私有构造器
@@ -69,17 +70,17 @@ public final class JRobin {
 	 * @param application
 	 *            应用名字
 	 * @param name
-	 *            rrd文件名
+	 *            JRobin标识
 	 * @param rrdFile
 	 *            rrd文件
 	 * @param step
 	 *            步长
-	 * @param requestName
+	 * @param label
 	 *            非必须，用于显示
 	 * @throws RrdException
 	 * @throws IOException
 	 */
-	private JRobin(String application, String name, File rrdFile, int step, String requestName)
+	private JRobin(String application, String name, File rrdFile, int step, String label)
 	        throws RrdException, IOException {
 		assert application != null;
 		assert name != null;
@@ -90,8 +91,8 @@ public final class JRobin {
 		this.name = name;
 		this.rrdFileName = rrdFile.getPath();
 		this.step = step;
-		this.requestName = requestName;
-
+		this.label = label;
+		// 初始化
 		init();
 	}
 
@@ -105,18 +106,18 @@ public final class JRobin {
 	 *            应用名字
 	 * @param name
 	 *            rrd文件名
-	 * @param requestName
+	 * @param label
 	 *            可选名字，用于显示
 	 * @return
 	 * @throws RrdException
 	 * @throws IOException
 	 */
-	public static JRobin createInstance(String application, String name, String requestName)
+	public static JRobin createInstance(String application, String name, String label)
 	        throws RrdException, IOException {
 		File rrdStorageDir = FileUtil.getStorageDirectory(application);
 		File rrdFile = new File(rrdStorageDir, name + ".rrd");
 		int step = ParameterUtil.getParameterAsInt(Parameter.COLLECT_RATE);
-		return new JRobin(application, name, rrdFile, step, requestName);
+		return new JRobin(application, name, rrdFile, step, label);
 	}
 
 	/**
@@ -132,7 +133,7 @@ public final class JRobin {
 		File rrdFile = new File(rrdFileName);
 		File rrdDir = rrdFile.getParentFile();
 		if (!FileUtil.ensureFilePath(rrdDir)) {
-			throw new IOException("can not create directory:" + rrdDir.getCanonicalPath());
+			throw new IOException("can not create rrd directory:" + rrdDir.getCanonicalPath());
 		}
 		if (rrdFile.exists() || rrdFile.length() == 0) {
 			RrdDef rrdDef = new RrdDef(rrdFileName, step);
@@ -166,12 +167,12 @@ public final class JRobin {
 	 * @throws RrdException
 	 * @throws IOException
 	 */
-	public void resetFile() throws RrdException, IOException {
+	public void resetFile() throws GaaraException {
 		FileUtil.delete(rrdFileName);
 		try {
 			init();
-		} catch (final RrdException e) {
-			throw e;
+		} catch (Throwable e) {
+			throw new GaaraException(e);
 		}
 	}
 
@@ -194,8 +195,8 @@ public final class JRobin {
 	public byte[] graph(TimeRange range, int width, int height) throws IOException, RrdException {
 		try {
 			// create common part of graph definition
-			final RrdGraphDef graphDef = new RrdGraphDef();
-			// 中文
+			RrdGraphDef graphDef = new RrdGraphDef();
+			// 中文 TODO 目前没找到更好的解决中文乱码问题
 			if (Locale.CHINESE.getLanguage().equals(
 			        I18N.getResourceBundle().getLocale().getLanguage())) {
 				graphDef.setSmallFont(new Font(Font.MONOSPACED, Font.PLAIN, 10));
@@ -242,23 +243,21 @@ public final class JRobin {
 		String label = getLabel();
 
 		// 设置图像标签头
-		String titleStart;
+		StringBuilder title = new StringBuilder();
 		if (label.length() > 31 && width <= 200) {
-			titleStart = label;
+			title.append(label);
 		} else {
-			titleStart = label + " - " + range.getLabel();
+			title.append(label).append(" - ").append(range.getLabel());
 		}
 		// 设置图像标签尾
-		String titleEnd;
 		if (width > 400) {
 			if (range.getPeriod() == null) {
-				titleEnd = " - " + I18N.getFormattedString("sur", application);
+				title.append(" - ").append(I18N.getFormattedString("at", application));
 			} else {
-				titleEnd = " - " + I18N.getCurrentDate() + ' '
-				        + I18N.getFormattedString("sur", application);
+				title.append(" - ").append(I18N.getCurrentDate()).append(' ')
+				        .append(I18N.getFormattedString("at", application));
 			}
 		} else {
-			titleEnd = "";
 			if (range.getPeriod() == null) {
 				graphDef.setLargeFont(graphDef.getLargeFont().deriveFont(
 				        graphDef.getLargeFont().getSize2D() - 2f));
@@ -266,7 +265,7 @@ public final class JRobin {
 		}
 		graphDef.setStartTime(startTime);
 		graphDef.setEndTime(endTime);
-		graphDef.setTitle(titleStart + titleEnd);
+		graphDef.setTitle(title.toString());
 		graphDef.setFirstDayOfWeek(Calendar.getInstance(I18N.getCurrentLocale())
 		        .getFirstDayOfWeek());
 
@@ -277,7 +276,7 @@ public final class JRobin {
 		// 设置图片宽高
 		graphDef.setWidth(width);
 		graphDef.setHeight(height);
-		// 小图去掉辅助说明
+		// 小图处理
 		if (width <= 100) {
 			graphDef.setNoLegend(true);
 			graphDef.setUnitsLength(0);
@@ -286,6 +285,14 @@ public final class JRobin {
 		}
 	}
 
+	/**
+	 * 获得JRobin名字
+	 * 
+	 * @author lichengwu
+	 * @created 2012-2-14
+	 * 
+	 * @return
+	 */
 	public String getName() {
 		return name;
 	}
@@ -295,16 +302,11 @@ public final class JRobin {
 	 * 
 	 * @author lichengwu
 	 * @created 2012-2-2
-	 *
+	 * 
 	 * @return
 	 */
 	public String getLabel() {
-		if (requestName == null) {
-			return I18N.getString(name);
-		}
-		final String shortRequestName = requestName
-		        .substring(0, Math.min(30, requestName.length()));
-		return I18N.getFormattedString("Temps_moyens_de", shortRequestName);
+		return I18N.getString(label);
 	}
 
 	/**
@@ -312,9 +314,11 @@ public final class JRobin {
 	 * 
 	 * @author lichengwu
 	 * @created 2012-2-2
-	 *
-	 * @param graphDef {@link RrdGraphDef}
-	 * @param height 高度
+	 * 
+	 * @param graphDef
+	 *            {@link RrdGraphDef}
+	 * @param height
+	 *            高度
 	 */
 	private void setGraphSource(RrdGraphDef graphDef, int height) {
 		final String average = "average";
@@ -323,12 +327,12 @@ public final class JRobin {
 		graphDef.datasource(average, rrdFileName, dataSourceName, "AVERAGE");
 		graphDef.datasource(max, rrdFileName, dataSourceName, "MAX");
 		graphDef.setMinValue(0);
-		final String moyenneLabel = I18N.getString("Moyenne");
-		final String maximumLabel = I18N.getString("Maximum");
-		graphDef.area(average, getPaint(height), moyenneLabel);
-		graphDef.line(max, Color.BLUE, maximumLabel);
-		graphDef.gprint(average, "AVERAGE", moyenneLabel + ": %9.0f %S\\r");
-		graphDef.gprint(max, "MAX", maximumLabel + ": %9.0f %S\\r");
+		final String averageLabel = I18N.getString("average_value");
+		final String maxLabel = I18N.getString("max_value");
+		graphDef.area(average, getPaint(height), averageLabel);
+		graphDef.line(max, Color.BLUE, maxLabel);
+		graphDef.gprint(average, "AVERAGE", averageLabel + ": %9.0f %S\\r");
+		graphDef.gprint(max, "MAX", maxLabel + ": %9.0f %S\\r");
 	}
 
 	/**
@@ -336,8 +340,9 @@ public final class JRobin {
 	 * 
 	 * @author lichengwu
 	 * @created 2012-2-2
-	 *
-	 * @param height 图像高度
+	 * 
+	 * @param height
+	 *            图像高度
 	 * @return 颜色模式
 	 */
 	private Paint getPaint(int height) {
@@ -379,6 +384,84 @@ public final class JRobin {
 		} catch (Throwable e) {
 			throw new GaaraException(e);
 		}
+	}
+
+	/**
+	 * 获得最后一次存储到数据库的值
+	 * 
+	 * @author lichengwu
+	 * @created 2012-2-14
+	 *
+	 * @return 最后一次存储到数据库的值
+	 * @throws GaaraException
+	 */
+	public double getLastValue() throws GaaraException {
+		// 从池中获得rrd数据库的引用
+		try {
+			RrdDb rrdDb = rrdPool.requestRrdDb(rrdFileName);
+			try {
+				return rrdDb.getLastDatasourceValue(getDataSourceName());
+			} finally {
+				// 释放rrd数据库的引用
+				rrdPool.release(rrdDb);
+			}
+		} catch (Exception ex) {
+			throw new GaaraException(ex);
+		}
+
+	}
+	
+	/**
+	 * 写入数据
+	 * 
+	 * @author lichengwu
+	 * @created 2012-2-14
+	 *
+	 * @param value 数据
+	 * @throws GaaraException
+	 */
+	public void addValue(double value) throws GaaraException {
+		try {
+			// 从池中获得rrd数据库引用
+			final RrdDb rrdDb = rrdPool.requestRrdDb(rrdFileName);
+			synchronized (rrdDb) {
+				try {
+					// create sample with the current timestamp
+					final Sample sample = rrdDb.createSample();
+					//如果最后更新时间大于当前时间，将会抛出异常：Bad sample timestamp
+					if (sample.getTime() > rrdDb.getLastUpdateTime()) {
+						// set value for load datasource
+						sample.setValue(getDataSourceName(), value);
+						// update database
+						sample.update();
+					}
+				} finally {
+					// 释放rrd数据库的引用
+					rrdPool.release(rrdDb);
+				}
+			}
+		} catch (Throwable e){ 
+			if (e.getMessage() != null && e.getMessage().startsWith("Invalid file header")) {
+				//如果rrd文件损坏，重置文件
+				resetFile();
+				addValue(value);
+			}
+			throw new GaaraException(e);
+		}
+		
+	}
+	
+	
+	/**
+	 * 删除数据库
+	 * 
+	 * @author lichengwu
+	 * @created 2012-2-14
+	 *
+	 * @return
+	 */
+	public boolean delete(){
+		return FileUtil.delete(rrdFileName);
 	}
 
 	/**
