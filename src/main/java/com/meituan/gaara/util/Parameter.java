@@ -60,7 +60,12 @@ public enum Parameter {
 	/**
 	 * PID
 	 */
-	PID("java_pid");
+	PID("java_pid"),
+	
+	/**
+	 * gaara运行模式
+	 */
+	GAARA_RUN_MODE("gaara.run.mode");
 
 	private String name;
 

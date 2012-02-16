@@ -145,7 +145,7 @@ final public class FileUtil {
 	public static String getConfigPath() {
 		return FileUtil.class.getResource("/com/meituan/gaara/conf/").getFile();
 	}
-
+	
 	public static void main(String[] args) {
 		System.out.println(new File("E:/war2.rar").mkdirs());
 	}

@@ -37,6 +37,8 @@ import com.meituan.gaara.info.TransientInfo;
 final public class GarbageCollectorInfo implements TransientInfo, Serializable {
 
 	private static final long serialVersionUID = -2774335299862104087L;
+	
+	private long lastUpdate = 0;
 
 	private List<GarbageCollector> gcList = new ArrayList<GarbageCollector>(0);
 
@@ -112,6 +114,7 @@ final public class GarbageCollectorInfo implements TransientInfo, Serializable {
 	 * @see com.meituan.gaara.info.TransientInfo#refresh()
 	 */
 	public boolean refresh() {
+		lastUpdate = System.currentTimeMillis();
 		obtainGcInfo();
 		return gcList.size() > 0;
 	}
@@ -164,5 +167,13 @@ final public class GarbageCollectorInfo implements TransientInfo, Serializable {
 			}
 		}
 	}
+
+	/**
+     * @see com.meituan.gaara.info.TransientInfo#lastUpdate()
+     */
+    @Override
+    public long lastUpdate() {
+	    return lastUpdate;
+    }
 
 }

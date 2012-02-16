@@ -9,7 +9,6 @@ import java.io.Serializable;
 
 import com.meituan.gaara.info.TransientInfo;
 
-
 /**
  * 虚拟机信息
  * 
@@ -18,12 +17,23 @@ import com.meituan.gaara.info.TransientInfo;
  * 
  * @version 1.0
  */
-final public class VirtualMachineInfo implements TransientInfo,Serializable {
+final public class VirtualMachineInfo implements TransientInfo, Serializable {
 
-    private static final long serialVersionUID = 4145011994188568350L;
+	private static final long serialVersionUID = 4145011994188568350L;
 
-    public boolean refresh() {
-	    return false;
-    }
-	
+	private long lastUpdate = 0;
+
+	public boolean refresh() {
+		lastUpdate = System.currentTimeMillis();
+		return false;
+	}
+
+	/**
+	 * @see com.meituan.gaara.info.TransientInfo#lastUpdate()
+	 */
+	@Override
+	public long lastUpdate() {
+		return lastUpdate;
+	}
+
 }

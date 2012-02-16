@@ -59,7 +59,6 @@ public final class JRobin {
 
 	private RrdDbPool rrdPool;
 	private String application;
-	private String name;
 	private String rrdFileName;
 	private int step;
 	private String label;
@@ -69,8 +68,6 @@ public final class JRobin {
 	 * 
 	 * @param application
 	 *            应用名字
-	 * @param name
-	 *            JRobin标识
 	 * @param rrdFile
 	 *            rrd文件
 	 * @param step
@@ -80,15 +77,13 @@ public final class JRobin {
 	 * @throws RrdException
 	 * @throws IOException
 	 */
-	private JRobin(String application, String name, File rrdFile, int step, String label)
+	private JRobin(String application, File rrdFile, int step, String label)
 	        throws RrdException, IOException {
 		assert application != null;
-		assert name != null;
 		assert rrdFile != null;
 		assert step > 0;
 		rrdPool = RrdDbPool.getInstance();
 		this.application = application;
-		this.name = name;
 		this.rrdFileName = rrdFile.getPath();
 		this.step = step;
 		this.label = label;
@@ -104,20 +99,20 @@ public final class JRobin {
 	 * 
 	 * @param application
 	 *            应用名字
-	 * @param name
-	 *            rrd文件名
 	 * @param label
 	 *            可选名字，用于显示
 	 * @return
-	 * @throws RrdException
-	 * @throws IOException
+	 * @throws GaaraException 
 	 */
-	public static JRobin createInstance(String application, String name, String label)
-	        throws RrdException, IOException {
-		File rrdStorageDir = FileUtil.getStorageDirectory(application);
-		File rrdFile = new File(rrdStorageDir, name + ".rrd");
-		int step = ParameterUtil.getParameterAsInt(Parameter.COLLECT_RATE);
-		return new JRobin(application, name, rrdFile, step, label);
+	public static JRobin createInstance(String application, String label) throws GaaraException {
+		try {
+	        File rrdStorageDir = FileUtil.getStorageDirectory(application);
+	        File rrdFile = new File(rrdStorageDir, label + ".rrd");
+	        int step = ParameterUtil.getParameterAsInt(Parameter.COLLECT_RATE);
+	        return new JRobin(application, rrdFile, step, label);
+        } catch (Throwable e) {
+	        throw new GaaraException(e);
+        } 
 	}
 
 	/**
@@ -286,18 +281,6 @@ public final class JRobin {
 	}
 
 	/**
-	 * 获得JRobin名字
-	 * 
-	 * @author lichengwu
-	 * @created 2012-2-14
-	 * 
-	 * @return
-	 */
-	public String getName() {
-		return name;
-	}
-
-	/**
 	 * 获得显示标签
 	 * 
 	 * @author lichengwu
@@ -362,11 +345,11 @@ public final class JRobin {
 	 * 
 	 * @return
 	 */
-	private String getDataSourceName() {
-		if (name.length() <= 20) {
-			return name;
+	public String getDataSourceName() {
+		if (label.length() <= 20) {
+			return label;
 		}
-		return name.substring(0, 20);
+		return label.substring(0, 20);
 	}
 
 	/**

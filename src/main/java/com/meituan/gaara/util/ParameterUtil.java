@@ -3,6 +3,7 @@ package com.meituan.gaara.util;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.Serializable;
@@ -56,6 +57,7 @@ final public class ParameterUtil implements Serializable {
 		try {
 			readProperties();
 			initLocalInfo();
+			loadCustomerSetting();
 			PID.getPID();
 		} catch (FileNotFoundException e) {
 			log.error(e.getMessage(), e);
@@ -257,6 +259,76 @@ final public class ParameterUtil implements Serializable {
 		if (hostAddress != null) {
 			properties.put(Parameter.HOST_ADDRESS.getName(), hostAddress);
 			log.info("get host address:" + hostAddress);
+		}
+	}
+
+	/**
+	 * 获得用户配置信息
+	 * 
+	 * @author lichengwu
+	 * @created 2012-2-16
+	 * 
+	 */
+	private static void loadCustomerSetting() {
+		FileReader reader = null;
+		try {
+			// gaara文件存储路径
+			File storageDirectory = FileUtil.getStorageDirectory(WebUtil.getCurrentApplication());
+			FileUtil.ensureFilePath(storageDirectory);
+			File file = new File(storageDirectory.getCanonicalPath() + File.separator
+			        + "application.properties");
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			reader = new FileReader(file);
+			properties.load(reader);
+		} catch (IOException e) {
+			log.error("can not load customer setting:" + e.getMessage());
+		} finally {
+			Closer.close(reader);
+		}
+	}
+
+	/**
+	 * 存储用户自定义配置
+	 * <p>
+	 * 如果配置存在，则更新;<br>
+	 * 否则插入新配置。<br>
+	 * <b>同时将新配置装载到当前环境中</b>
+	 * </p>
+	 * 
+	 * @author lichengwu
+	 * @created 2012-2-16
+	 * 
+	 * @param key
+	 * @param value
+	 */
+	public static void storeCustomerProperties(String key, Object value) {
+		assert key != null;
+		assert value != null;
+		FileReader reader = null;
+		FileWriter writer = null;
+		try {
+			// gaara文件存储路径
+			File storageDirectory = FileUtil.getStorageDirectory(WebUtil.getCurrentApplication());
+			FileUtil.ensureFilePath(storageDirectory);
+			File file = new File(storageDirectory.getCanonicalPath() + File.separator
+			        + "application.properties");
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			reader = new FileReader(file);
+			writer = new FileWriter(file);
+			Properties props = new Properties();
+			props.load(reader);
+			props.put(key, value);
+			props.store(writer, "");
+			// 同时保存到当前的设置中
+			properties.put(key, value);
+		} catch (IOException e) {
+			log.error("can not store customer setting:" + e.getMessage());
+		} finally {
+			Closer.close(reader, writer);
 		}
 	}
 
