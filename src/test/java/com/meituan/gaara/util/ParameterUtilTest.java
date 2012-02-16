@@ -7,6 +7,8 @@ package com.meituan.gaara.util;
 
 import org.junit.Test;
 
+import com.meituan.gaara.test.BaseTest;
+
 
 /**
  *
@@ -15,11 +17,10 @@ import org.junit.Test;
  *
  * @version 1.0
  */
-public class ParameterUtilTest {
+public class ParameterUtilTest extends BaseTest{
 	@Test
 	public void test(){
-		ParameterUtil.initialize(null);
-		System.out.println("PID:"+ParameterUtil.getParameter(Parameter.PID));
-		System.out.println("java_version:"+ParameterUtil.getParameter(Parameter.JAVA_VERSION));
+		ParameterUtil.storeCustomerProperties("key.sss", "value");
+		System.out.println(ParameterUtil.getParameter("key.sss"));
 	}
 }

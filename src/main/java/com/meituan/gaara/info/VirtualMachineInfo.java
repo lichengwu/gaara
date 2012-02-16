@@ -3,11 +3,10 @@
  * All rights reserved.
  * 
  */
-package com.meituan.gaara.jvm;
+package com.meituan.gaara.info;
 
 import java.io.Serializable;
 
-import com.meituan.gaara.info.TransientInfo;
 
 /**
  * 虚拟机信息

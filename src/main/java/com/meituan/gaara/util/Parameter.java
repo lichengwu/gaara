@@ -41,17 +41,17 @@ public enum Parameter {
 	 * 系统名称
 	 */
 	OS_NAME("os.name"),
-	
+
 	/**
 	 * gaara文件存储路径
 	 */
 	STORAGE_DIRECTORY("storage_directory"),
-	
+
 	/**
 	 * 收集频率
 	 */
 	COLLECT_RATE("gaara.collect_rate"),
-	
+
 	/**
 	 * java版本号
 	 */
@@ -61,11 +61,16 @@ public enum Parameter {
 	 * PID
 	 */
 	PID("java_pid"),
-	
+
 	/**
 	 * gaara运行模式
 	 */
-	GAARA_RUN_MODE("gaara.run.mode");
+	GAARA_RUN_MODE("gaara.run.mode"),
+
+	/**
+	 * 已注册的收集器
+	 */
+	REGISTERED_COLLECTORS("gaara.registered.collectors");
 
 	private String name;
 

@@ -13,7 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.meituan.gaara.exception.GaaraException;
-import com.meituan.gaara.jvm.memory.MemoryInfo;
+import com.meituan.gaara.info.MemoryInfo;
 import com.meituan.gaara.store.JRobin;
 
 /**
@@ -45,11 +45,15 @@ public class MemoryInfoCollector extends DefaultStorageCollector {
 	 * @param application
 	 * @throws GaaraException
 	 */
-	public MemoryInfoCollector(String application) throws GaaraException {
-		this.application = application;
-		if (!client) {
-			initJRobin();
-		}
+	public MemoryInfoCollector(String application) {
+		try {
+	        this.application = application;
+	        if (!client) {
+	        	initJRobin();
+	        }
+        } catch (GaaraException e) {
+	        log.error("error occur while creating collector["+this.getClass().getSimpleName()+"]:"+e.getMessage());
+        }
 	}
 
 	/**

@@ -3,14 +3,13 @@
  * All rights reserved.
  * 
  */
-package com.meituan.gaara.jvm.memory;
+package com.meituan.gaara.info;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryPoolMXBean;
 import java.util.List;
 
-import com.meituan.gaara.info.TransientInfo;
 
 /**
  * 虚拟机内存信息

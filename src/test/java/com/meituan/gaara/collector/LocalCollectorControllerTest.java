@@ -5,14 +5,11 @@
  */
 package com.meituan.gaara.collector;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.Serializable;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 
-import com.meituan.gaara.jvm.memory.MemoryInfo;
+import com.meituan.gaara.info.MemoryInfo;
 import com.meituan.gaara.test.BaseTest;
 
 

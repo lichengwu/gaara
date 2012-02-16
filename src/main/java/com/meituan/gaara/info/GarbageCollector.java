@@ -3,7 +3,7 @@
  * All rights reserved.
  * 
  */
-package com.meituan.gaara.jvm.gc;
+package com.meituan.gaara.info;
 
 import java.io.Serializable;
 

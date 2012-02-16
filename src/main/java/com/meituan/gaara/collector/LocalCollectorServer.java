@@ -5,10 +5,6 @@
  */
 package com.meituan.gaara.collector;
 
-import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -30,10 +26,6 @@ public class LocalCollectorServer {
 	 */
 	private Timer timer;
 	
-	/**
-	 * 应用url
-	 */
-	private Map<String, List<URL>> appURLs = new HashMap<String, List<URL>>();
 	
 	private LocalCollectorServer(){
 		
@@ -46,7 +38,7 @@ public class LocalCollectorServer {
 	 * @created 2012-2-15
 	 *
 	 */
-	private void doCollect() {
+	public void doCollect() {
 		// 收集时间间隔
 		long interval = ParameterUtil.getParameterAsInt(Parameter.COLLECT_RATE) * 1000L;
 		timer.schedule(new TimerTask() {

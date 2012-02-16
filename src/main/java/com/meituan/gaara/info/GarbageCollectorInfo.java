@@ -3,7 +3,7 @@
  * All rights reserved.
  * 
  */
-package com.meituan.gaara.jvm.gc;
+package com.meituan.gaara.info;
 
 import java.io.Serializable;
 import java.lang.management.GarbageCollectorMXBean;
@@ -23,7 +23,6 @@ import javax.management.ReflectionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.meituan.gaara.info.TransientInfo;
 
 /**
  * JVM 垃圾回收器工具类，用于获得整个JVM的垃圾回收信息

@@ -6,15 +6,15 @@
 package com.meituan.gaara.collector;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.meituan.gaara.exception.GaaraException;
+import com.meituan.gaara.collector.factory.CollectorFactory;
 
 /**
  * 收集器控制器
@@ -28,7 +28,7 @@ public class LocalCollectorController {
 
 	private static final Log log = LogFactory.getLog(LocalCollectorController.class);
 
-	private Map<String, Collector> localCollectorMap = new HashMap<String, Collector>();
+	private Map<String, Collector> localCollectorMap = new ConcurrentHashMap<String, Collector>();
 
 	/**
 	 * 是否正在收集信息
@@ -38,28 +38,21 @@ public class LocalCollectorController {
 	private static LocalCollectorController controller = new LocalCollectorController();
 
 	private LocalCollectorController() {
-		registerCollector();
+		localCollectorMap=CollectorFactory.getInstance().getRegisteredCollectorMap();
 	}
 
+	/**
+	 * 获得LocalCollectorController实例
+	 * 
+	 * @author lichengwu
+	 * @created 2012-2-16
+	 *
+	 * @return
+	 */
 	public static LocalCollectorController getInstance() {
 		return controller;
 	}
 
-	/**
-	 * 注册收集器 //TODO
-	 * 
-	 * @author lichengwu
-	 * @created 2012-2-16
-	 * 
-	 */
-	private void registerCollector() {
-		try {
-			MemoryInfoCollector collector = new MemoryInfoCollector("gaara");
-			localCollectorMap.put(collector.getName(), collector);
-		} catch (GaaraException e) {
-			// TODO
-		}
-	}
 
 	/**
 	 * 将收集器添加到LocalCollectorController
@@ -70,37 +63,19 @@ public class LocalCollectorController {
 	 * @param collector
 	 * @return 当添加成功时，返回true；否则返回false并销毁collector
 	 */
-	public synchronized boolean addCollector(Collector collector) {
+	public synchronized boolean addCollector(String collector) {
 		try {
 			while (true) {
+				//如果正在收集，休息500ms
 				if (!collecting) {
-					if (localCollectorMap.containsKey(collector.getName())) {
-						throw new GaaraException("collector already exist");
-					}
+					CollectorFactory.getInstance().addCollector(collector);
 					return true;
 				}
 				TimeUnit.MILLISECONDS.sleep(500);
 			}
 		} catch (Throwable e) {
-			collector.destory();
-			log.error("添加收集器[" + collector.getClass().getSimpleName() + "]失败," + e.getMessage());
 			return false;
 		}
-	}
-
-	/**
-	 * 删除collector
-	 * 
-	 * @author lichengwu
-	 * @created 2012-2-16
-	 *
-	 * @param collectName 收集器的名字
-	 * @return 当且仅当collector存在并且成功删除返回true，否则返回false
-	 */
-	public synchronized boolean removeCollector(String collectName) {
-		assert collectName != null;
-		Collector collector = localCollectorMap.remove(collectName);
-		return collector == null;
 	}
 
 	/**
