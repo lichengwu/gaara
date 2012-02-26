@@ -3,7 +3,7 @@
  * All rights reserved.
  * 
  */
-package com.meituan.gaara.jvm.gc;
+package com.meituan.gaara.info;
 
 import java.io.Serializable;
 import java.lang.management.GarbageCollectorMXBean;
@@ -23,7 +23,6 @@ import javax.management.ReflectionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.meituan.gaara.info.TransientInfo;
 
 /**
  * JVM 垃圾回收器工具类，用于获得整个JVM的垃圾回收信息
@@ -37,6 +36,8 @@ import com.meituan.gaara.info.TransientInfo;
 final public class GarbageCollectorInfo implements TransientInfo, Serializable {
 
 	private static final long serialVersionUID = -2774335299862104087L;
+	
+	private long lastUpdate = 0;
 
 	private List<GarbageCollector> gcList = new ArrayList<GarbageCollector>(0);
 
@@ -111,8 +112,8 @@ final public class GarbageCollectorInfo implements TransientInfo, Serializable {
 	 * @return 如果能获得到垃圾收集器信息(即垃圾收集器可用)，然后true；否则返回false。
 	 * @see com.meituan.gaara.info.TransientInfo#refresh()
 	 */
-	@Override
 	public boolean refresh() {
+		lastUpdate = System.currentTimeMillis();
 		obtainGcInfo();
 		return gcList.size() > 0;
 	}
@@ -165,5 +166,13 @@ final public class GarbageCollectorInfo implements TransientInfo, Serializable {
 			}
 		}
 	}
+
+	/**
+     * @see com.meituan.gaara.info.TransientInfo#lastUpdate()
+     */
+    @Override
+    public long lastUpdate() {
+	    return lastUpdate;
+    }
 
 }

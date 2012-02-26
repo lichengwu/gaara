@@ -7,6 +7,9 @@ package com.meituan.gaara.jvm.gc;
 
 import org.junit.Test;
 
+import com.meituan.gaara.info.GarbageCollector;
+import com.meituan.gaara.info.GarbageCollectorInfo;
+
 
 /**
  * test for com.meituan.gaara.jvm.gc.GarbageCollectorHolder

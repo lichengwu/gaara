@@ -11,6 +11,8 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.meituan.gaara.info.MemoryInfo;
+
 /**
  * test for com.meituan.gaara.jvm.memory.MemoryInformation
  * 

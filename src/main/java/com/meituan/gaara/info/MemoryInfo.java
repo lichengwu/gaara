@@ -3,15 +3,13 @@
  * All rights reserved.
  * 
  */
-package com.meituan.gaara.jvm.memory;
+package com.meituan.gaara.info;
 
-import java.io.Serializable;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryPoolMXBean;
 import java.util.List;
 
-import com.meituan.gaara.info.TransientInfo;
 
 /**
  * 虚拟机内存信息
@@ -27,9 +25,11 @@ import com.meituan.gaara.info.TransientInfo;
  * 
  * @version 1.0
  */
-public class MemoryInfo implements TransientInfo, Serializable {
+public class MemoryInfo implements TransientInfo {
 
 	private static final long serialVersionUID = 5145204746778194464L;
+	
+	private long lastUpdate = 0;
 
 	private MemoryPoolMXBean edenPoolMXBean;
 
@@ -40,6 +40,8 @@ public class MemoryInfo implements TransientInfo, Serializable {
 	private MemoryPoolMXBean survivorPoolMXBean;
 
 	private MemoryMXBean memoryMXBean;
+	
+	
 
 	/**
 	 * heap堆中已使用内存大小
@@ -321,8 +323,8 @@ public class MemoryInfo implements TransientInfo, Serializable {
 	 * 
 	 * @see com.meituan.gaara.jvm.TransientInfo#refresh()
 	 */
-	@Override
 	public boolean refresh() {
+		lastUpdate = System.currentTimeMillis();
 		load();
 		return true;
 	}
@@ -348,4 +350,12 @@ public class MemoryInfo implements TransientInfo, Serializable {
 		maxEdenSize = edenPoolMXBean.getUsage().getMax();
 		usedEdenSize = edenPoolMXBean.getUsage().getUsed();
 	}
+
+	/**
+     * @see com.meituan.gaara.info.TransientInfo#lastUpdate()
+     */
+    @Override
+    public long lastUpdate() {
+	    return lastUpdate;
+    }
 }
