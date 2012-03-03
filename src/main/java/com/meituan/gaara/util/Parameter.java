@@ -70,7 +70,12 @@ public enum Parameter {
 	/**
 	 * 已注册的收集器
 	 */
-	REGISTERED_COLLECTORS("gaara.registered.collectors");
+	REGISTERED_COLLECTORS("gaara.registered.collectors"),
+	
+	/**
+	 * 系统启动时间
+	 */
+	APPLICATION_START_TIME("gaara.application.start.time");
 
 	private String name;
 

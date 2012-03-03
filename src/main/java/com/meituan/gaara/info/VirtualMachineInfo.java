@@ -7,7 +7,6 @@ package com.meituan.gaara.info;
 
 import java.io.Serializable;
 
-
 /**
  * 虚拟机信息
  * 
@@ -21,6 +20,10 @@ final public class VirtualMachineInfo implements TransientInfo, Serializable {
 	private static final long serialVersionUID = 4145011994188568350L;
 
 	private long lastUpdate = 0;
+
+	public VirtualMachineInfo() {
+		lastUpdate = System.currentTimeMillis();
+	}
 
 	public boolean refresh() {
 		lastUpdate = System.currentTimeMillis();

@@ -289,7 +289,7 @@ public final class JRobin {
 	 * @return
 	 */
 	public String getLabel() {
-		return I18N.getString(label);
+		return I18N.tryString(label);
 	}
 
 	/**

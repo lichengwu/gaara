@@ -16,7 +16,7 @@ import java.io.Serializable;
  * @version 1.0
  */
 public interface Collector {
-
+	
 	/**
 	 * 收集数据
 	 * 

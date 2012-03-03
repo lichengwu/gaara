@@ -59,6 +59,8 @@ final public class ParameterUtil implements Serializable {
 			initLocalInfo();
 			loadCustomerSetting();
 			PID.getPID();
+			//记录系统启动时间
+			setParameter(Parameter.APPLICATION_START_TIME, System.currentTimeMillis());
 		} catch (FileNotFoundException e) {
 			log.error(e.getMessage(), e);
 		} catch (IOException e) {
@@ -273,7 +275,7 @@ final public class ParameterUtil implements Serializable {
 		FileReader reader = null;
 		try {
 			// gaara文件存储路径
-			File storageDirectory = FileUtil.getStorageDirectory(WebUtil.getCurrentApplication());
+			File storageDirectory = FileUtil.getStorageDirectory(WebUtil.getFullCurrentApplication());
 			FileUtil.ensureFilePath(storageDirectory);
 			File file = new File(storageDirectory.getCanonicalPath() + File.separator
 			        + "application.properties");
@@ -310,7 +312,7 @@ final public class ParameterUtil implements Serializable {
 		FileWriter writer = null;
 		try {
 			// gaara文件存储路径
-			File storageDirectory = FileUtil.getStorageDirectory(WebUtil.getCurrentApplication());
+			File storageDirectory = FileUtil.getStorageDirectory(WebUtil.getFullCurrentApplication());
 			FileUtil.ensureFilePath(storageDirectory);
 			File file = new File(storageDirectory.getCanonicalPath() + File.separator
 			        + "application.properties");

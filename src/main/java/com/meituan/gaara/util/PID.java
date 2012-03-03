@@ -55,7 +55,7 @@ public final class PID {
 			} else {
 				pid = getPIDFromOS();
 			}
-			//缓存
+			// 缓存
 			ParameterUtil.setParameter(Parameter.PID, pid);
 		}
 		return pid;
@@ -98,9 +98,9 @@ public final class PID {
 				// 获得临时getpids.exe文件路径作为命令
 				cmd = new String[] { tempFile.getAbsolutePath() };
 			} catch (FileNotFoundException e) {
-				log.equals(e);
+				log.error(e.getMessage(), e);
 			} catch (IOException e) {
-				log.equals(e);
+				log.error(e.getMessage(), e);
 			} finally {
 				if (tempFile != null) {
 					tempFile.deleteOnExit();
@@ -126,7 +126,7 @@ public final class PID {
 			// 对于windows参考：http://www.scheibli.com/projects/getpids/index.html
 			pid = ppids.split(" ")[1];
 		} catch (Exception e) {
-			log.error(e);
+			log.error(e.getMessage(), e);
 		} finally {
 			if (tempFile != null) {
 				tempFile.deleteOnExit();

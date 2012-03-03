@@ -181,7 +181,7 @@ final public class GarbageCollector implements Serializable {
 	}
 
 	/**
-	 * 获得垃圾回收器是否否有效
+	 * 获得垃圾回收器是否有效
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-8

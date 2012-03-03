@@ -11,10 +11,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import com.meituan.gaara.collector.factory.CollectorFactory;
+import com.meituan.gaara.collector.factory.SampleCollectorFactory;
 
 /**
  * 收集器控制器
@@ -26,7 +23,7 @@ import com.meituan.gaara.collector.factory.CollectorFactory;
  */
 public class LocalCollectorController {
 
-	private static final Log log = LogFactory.getLog(LocalCollectorController.class);
+	//private static final Log log = LogFactory.getLog(LocalCollectorController.class);
 
 	private Map<String, Collector> localCollectorMap = new ConcurrentHashMap<String, Collector>();
 
@@ -38,7 +35,7 @@ public class LocalCollectorController {
 	private static LocalCollectorController controller = new LocalCollectorController();
 
 	private LocalCollectorController() {
-		localCollectorMap=CollectorFactory.getInstance().getRegisteredCollectorMap();
+		localCollectorMap=SampleCollectorFactory.getInstance().getRegisteredCollectorMap();
 	}
 
 	/**
@@ -68,7 +65,7 @@ public class LocalCollectorController {
 			while (true) {
 				//如果正在收集，休息500ms
 				if (!collecting) {
-					CollectorFactory.getInstance().addCollector(collector);
+					SampleCollectorFactory.getInstance().addCollector(collector);
 					return true;
 				}
 				TimeUnit.MILLISECONDS.sleep(500);

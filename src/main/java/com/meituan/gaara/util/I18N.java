@@ -102,10 +102,24 @@ final public class I18N {
 	 * 
 	 * @param key
 	 *            资源包中定义的key
-	 * @return 本地化的字符串
+	 * @return 本地化的字符串，如果不存在，返回null
 	 */
 	public static String getString(String key) {
 		return getResourceBundle().getString(key);
+	}
+
+	/**
+	 * 尝试获得本地化字符串，如果不存在，返回key
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-3
+	 *
+	 * @param key
+	 * @return 获得本地化字符串，如果不存在，返回key
+	 */
+	public static String tryString(String key) {
+		String value = getResourceBundle().getString(key);
+		return value == null ? key : value;
 	}
 
 	/**
@@ -222,11 +236,13 @@ final public class I18N {
 
 	/**
 	 * 创建整数格式化NumberFormat实例
-	 * <p><b>格式: </b>10,043,223,420</p>
+	 * <p>
+	 * <b>格式: </b>10,043,223,420
+	 * </p>
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-31
-	 *
+	 * 
 	 * @return {@link DecimalFormat}
 	 */
 	public static DecimalFormat createIntegerFormat() {
@@ -235,11 +251,13 @@ final public class I18N {
 
 	/**
 	 * 创建百分比格式化NumberFormat实例
-	 * <p><b>格式: </b>55.22</p>
+	 * <p>
+	 * <b>格式: </b>55.22
+	 * </p>
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-31
-	 *
+	 * 
 	 * @return {@link DecimalFormat}
 	 */
 	public static DecimalFormat createPercentFormat() {
@@ -248,11 +266,13 @@ final public class I18N {
 
 	/**
 	 * 默认日期格式化
-	 * <p><b>样式:</b>{@link DateFormat#SHORT}</p>
+	 * <p>
+	 * <b>样式:</b>{@link DateFormat#SHORT}
+	 * </p>
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-31
-	 *
+	 * 
 	 * @return 本地化的{@link DateFormat}
 	 */
 	public static DateFormat createDateFormat() {
@@ -261,11 +281,13 @@ final public class I18N {
 
 	/**
 	 * 默认日期时间格式
-	 * <p><b>样式:</b>{@link DateFormat#SHORT}</p>
+	 * <p>
+	 * <b>样式:</b>{@link DateFormat#SHORT}
+	 * </p>
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-31
-	 *
+	 * 
 	 * @return 本地化的{@link DateFormat}
 	 */
 	public static DateFormat createDateAndTimeFormat() {
@@ -274,12 +296,11 @@ final public class I18N {
 	}
 
 	/**
-	 * TODO 证明
-	 * 时间间隔格式化 
+	 * TODO 证明 时间间隔格式化
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-31
-	 *
+	 * 
 	 * @return
 	 */
 	public static DateFormat createDurationFormat() {
@@ -294,7 +315,7 @@ final public class I18N {
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-31
-	 *
+	 * 
 	 * @return
 	 */
 	public static String getCurrentDate() {
@@ -306,7 +327,7 @@ final public class I18N {
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-31
-	 *
+	 * 
 	 * @return
 	 */
 	public static String getCurrentDateAndTime() {

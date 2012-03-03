@@ -10,25 +10,23 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryPoolMXBean;
 import java.util.List;
 
-
 /**
  * 虚拟机内存信息
  * <p>
- * <b>注意:</b> {@link MemoryInfo}包含的内存信息只是 {@link MemoryInfo#getInstance()}
- * 方法调用时候的瞬时信息。 如果需要动态监控内存，请适时调用 {@link MemoryInfo#getInstance()}或者
- * {@link MemoryInfo#refresh()}。
+ * <b>注意:</b> {@link MemoryInfo}包含的内存信息只是瞬时信息。 如果需要动态监控内存，请适时调用
+ * {@link MemoryInfo#refresh()}刷新。
  * 
  * @see TransientInfo
  * 
  * @author lichengwu
  * @created 2012-1-8
  * 
- * @version 1.0
+ * @version 1.1
  */
 public class MemoryInfo implements TransientInfo {
 
 	private static final long serialVersionUID = 5145204746778194464L;
-	
+
 	private long lastUpdate = 0;
 
 	private MemoryPoolMXBean edenPoolMXBean;
@@ -41,7 +39,10 @@ public class MemoryInfo implements TransientInfo {
 
 	private MemoryMXBean memoryMXBean;
 	
-	
+	/**
+	 * 单例
+	 */
+	private static MemoryInfo INSTANCE = new MemoryInfo();
 
 	/**
 	 * heap堆中已使用内存大小
@@ -110,10 +111,19 @@ public class MemoryInfo implements TransientInfo {
 		memoryMXBean = ManagementFactory.getMemoryMXBean();
 		initPoolMXBean();
 		load();
+		lastUpdate = System.currentTimeMillis();
 	}
-
-	public static MemoryInfo getInstance() {
-		return new MemoryInfo();
+	
+	/**
+	 * 获得内存信息实例
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-3
+	 *
+	 * @return 内存信息实例
+	 */
+	public static MemoryInfo getInstance(){
+		return INSTANCE;
 	}
 
 	/**
@@ -352,10 +362,10 @@ public class MemoryInfo implements TransientInfo {
 	}
 
 	/**
-     * @see com.meituan.gaara.info.TransientInfo#lastUpdate()
-     */
-    @Override
-    public long lastUpdate() {
-	    return lastUpdate;
-    }
+	 * @see com.meituan.gaara.info.TransientInfo#lastUpdate()
+	 */
+	@Override
+	public long lastUpdate() {
+		return lastUpdate;
+	}
 }
