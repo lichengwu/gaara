@@ -7,6 +7,7 @@ package com.meituan.gaara.collector.factory;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,20 +28,20 @@ import com.meituan.gaara.util.WebUtil;
  * 
  * @version 1.1
  */
-public class SampleCollectorFactory {
+public class SimpleCollectorFactory {
 
-	private static final Log log = LogFactory.getLog(SampleCollectorFactory.class);
+	private static final Log log = LogFactory.getLog(SimpleCollectorFactory.class);
 
 	public Map<String, Collector> registeredCollectors = new ConcurrentHashMap<String, Collector>();
 
-	private final static SampleCollectorFactory INSTANCE = new SampleCollectorFactory();
+	private final static SimpleCollectorFactory INSTANCE = new SimpleCollectorFactory();
 
 	/**
 	 * 收集器所在的包
 	 */
 	private static String COLLECTOR_PACKAGE = "com.meituan.gaara.collector.";
 
-	private SampleCollectorFactory() {
+	private SimpleCollectorFactory() {
 		registerCollector();
 	}
 
@@ -136,7 +137,7 @@ public class SampleCollectorFactory {
 	 * @return 以类名为key，以collector为value的map
 	 */
 	public Map<String, Collector> getRegisteredCollectorMap() {
-		return registeredCollectors;
+		return Collections.unmodifiableMap(registeredCollectors);
 	}
 
 	/**
@@ -161,7 +162,7 @@ public class SampleCollectorFactory {
 	 * 
 	 * @return
 	 */
-	public static SampleCollectorFactory getInstance() {
+	public static SimpleCollectorFactory getInstance() {
 		return INSTANCE;
 	}
 

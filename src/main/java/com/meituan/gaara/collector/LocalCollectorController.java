@@ -6,12 +6,15 @@
 package com.meituan.gaara.collector;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-import com.meituan.gaara.collector.factory.SampleCollectorFactory;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import com.meituan.gaara.collector.factory.SimpleCollectorFactory;
 
 /**
  * 收集器控制器
@@ -23,9 +26,7 @@ import com.meituan.gaara.collector.factory.SampleCollectorFactory;
  */
 public class LocalCollectorController {
 
-	//private static final Log log = LogFactory.getLog(LocalCollectorController.class);
-
-	private Map<String, Collector> localCollectorMap = new ConcurrentHashMap<String, Collector>();
+	private static final Log log = LogFactory.getLog(LocalCollectorController.class);
 
 	/**
 	 * 是否正在收集信息
@@ -35,7 +36,6 @@ public class LocalCollectorController {
 	private static LocalCollectorController controller = new LocalCollectorController();
 
 	private LocalCollectorController() {
-		localCollectorMap=SampleCollectorFactory.getInstance().getRegisteredCollectorMap();
 	}
 
 	/**
@@ -43,13 +43,12 @@ public class LocalCollectorController {
 	 * 
 	 * @author lichengwu
 	 * @created 2012-2-16
-	 *
+	 * 
 	 * @return
 	 */
 	public static LocalCollectorController getInstance() {
 		return controller;
 	}
-
 
 	/**
 	 * 将收集器添加到LocalCollectorController
@@ -62,15 +61,55 @@ public class LocalCollectorController {
 	 */
 	public synchronized boolean addCollector(String collector) {
 		try {
+			int iCount = 0;
 			while (true) {
-				//如果正在收集，休息500ms
+				// 尝试20，不成功则返回false
+				if (iCount > 20) {
+					log.warn("add collector field:[time out]");
+					return false;
+				}
+				// 如果正在收集，休息500ms
 				if (!collecting) {
-					SampleCollectorFactory.getInstance().addCollector(collector);
+					SimpleCollectorFactory.getInstance().addCollector(collector);
 					return true;
 				}
 				TimeUnit.MILLISECONDS.sleep(500);
+				iCount++;
 			}
 		} catch (Throwable e) {
+			log.error(e.getMessage(), e);
+			return false;
+		}
+	}
+	
+	/**
+	 * 将收集器从LocalCollectorController删除
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-3
+	 *
+	 * @param collector 收集器名字
+	 * @return 删除成功返回true，否则返回false
+	 */
+	public synchronized boolean romoveCollector(String collector) {
+		try {
+			int iCount = 0;
+			while (true) {
+				// 尝试20，不成功则返回false
+				if (iCount > 20) {
+					log.warn("add collector field:[time out]");
+					return false;
+				}
+				// 如果正在收集，休息500ms
+				if (!collecting) {
+					SimpleCollectorFactory.getInstance().removeCollector(collector);
+					return true;
+				}
+				TimeUnit.MILLISECONDS.sleep(500);
+				iCount++;
+			}
+		} catch (Throwable e) {
+			log.error(e.getMessage(), e);
 			return false;
 		}
 	}
@@ -83,15 +122,22 @@ public class LocalCollectorController {
 	 * 
 	 * @return
 	 */
-	public Serializable doCollect() {
+	public synchronized Serializable doCollect() {
 		collecting = true;
-		StringBuilder data = new StringBuilder();
-		for (Entry<String, Collector> entry : localCollectorMap.entrySet()) {
+		long start = System.currentTimeMillis();
+		log.info("start to collect JVM info...");
+		Map<String, Collector> registeredCollectorMap = SimpleCollectorFactory.getInstance()
+		        .getRegisteredCollectorMap();
+		ArrayList<Serializable> collectedInfo = new ArrayList<Serializable>(
+		        registeredCollectorMap.size());
+		for (Entry<String, Collector> entry : registeredCollectorMap.entrySet()) {
 			Collector collector = entry.getValue();
-			data.append((Serializable) collector.collect());
+			collectedInfo.add(collector.collect());
 		}
 		collecting = false;
-		return data;
+		log.info("finish collect JVM info, cost " + (System.currentTimeMillis() - start) / 1000
+		        + "ms");
+		return collectedInfo;
 	}
 
 }
