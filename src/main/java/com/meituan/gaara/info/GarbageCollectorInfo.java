@@ -23,7 +23,6 @@ import javax.management.ReflectionException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-
 /**
  * JVM 垃圾回收器工具类，用于获得整个JVM的垃圾回收信息
  * 
@@ -36,7 +35,7 @@ import org.apache.commons.logging.LogFactory;
 final public class GarbageCollectorInfo implements TransientInfo, Serializable {
 
 	private static final long serialVersionUID = -2774335299862104087L;
-	
+
 	private long lastUpdate = 0;
 
 	private List<GarbageCollector> gcList = new ArrayList<GarbageCollector>(0);
@@ -47,28 +46,32 @@ final public class GarbageCollectorInfo implements TransientInfo, Serializable {
 	private MBeanServer platformMBeanServer = null;
 
 	/**
+	 * 单例
+	 */
+	private static GarbageCollectorInfo INSTANCE = new GarbageCollectorInfo();
+
+	/**
 	 * 私有构造方法
 	 */
 	private GarbageCollectorInfo() {
 		garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
 		platformMBeanServer = ManagementFactory.getPlatformMBeanServer();
 		obtainGcInfo();
+		lastUpdate = System.currentTimeMillis();
 	}
 
 	/**
 	 * 获得GarbageCollectorHolder实例
 	 * <p>
-	 * <b>注意：</b>{@link GarbageCollectorInfo}
-	 * 对象包含的垃圾收集器信息为调用 {@link #getInstance()}返回的瞬时静态信息。
-	 * 随着JVM内存不断变化，如果需要获得最新的JVM信息，请重新调用 {@link #getInstance()}获得新的实例。
-	 * 
+	 * <b>注意：</b> 随着JVM内存不断变化，如果需要获得最新的JVM信息，请重新调用 {@link #refresh()}获得新的实例。
+	 * </p>
 	 * @author lichengwu
 	 * @created 2012-1-8
 	 * 
 	 * @return {@link GarbageCollectorInfo} 实例。
 	 */
 	public static GarbageCollectorInfo getInstance() {
-		return new GarbageCollectorInfo();
+		return INSTANCE;
 	}
 
 	/**
@@ -107,14 +110,14 @@ final public class GarbageCollectorInfo implements TransientInfo, Serializable {
 	}
 
 	/**
-	 * 刷新垃圾回收去信息
+	 * 刷新垃圾回收器信息
 	 * 
 	 * @return 如果能获得到垃圾收集器信息(即垃圾收集器可用)，然后true；否则返回false。
 	 * @see com.meituan.gaara.info.TransientInfo#refresh()
 	 */
 	public boolean refresh() {
-		lastUpdate = System.currentTimeMillis();
 		obtainGcInfo();
+		lastUpdate = System.currentTimeMillis();
 		return gcList.size() > 0;
 	}
 
@@ -168,11 +171,11 @@ final public class GarbageCollectorInfo implements TransientInfo, Serializable {
 	}
 
 	/**
-     * @see com.meituan.gaara.info.TransientInfo#lastUpdate()
-     */
-    @Override
-    public long lastUpdate() {
-	    return lastUpdate;
-    }
+	 * @see com.meituan.gaara.info.TransientInfo#lastUpdate()
+	 */
+	@Override
+	public long lastUpdate() {
+		return lastUpdate;
+	}
 
 }

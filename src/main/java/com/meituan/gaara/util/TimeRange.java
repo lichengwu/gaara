@@ -25,11 +25,11 @@ final public class TimeRange implements Serializable {
 
 	private static final long MILLISECONDS_PER_DAY = 24L * 60 * 60 * 1000;
 
-	private  Period period;
+	private Period period;
 
-	private  Date startDate;
+	private Date startDate;
 
-	private  Date endDate;
+	private Date endDate;
 
 	private TimeRange(Period period, Date startDate, Date endDate) {
 		super();
@@ -53,9 +53,6 @@ final public class TimeRange implements Serializable {
 		if (index == -1) {
 			return Period.valueOfIgnoreCase(value).getRange();
 		}
-		// rq: on pourrait essayer aussi des dateFormat alternatifs,
-		// par exemple même pattern mais sans les slashs ou juste avec jour et
-		// mois
 		final DateFormat dateFormat = I18N.createDateFormat();
 		Date startDate;
 		try {
@@ -66,12 +63,9 @@ final public class TimeRange implements Serializable {
 		final Calendar minimum = Calendar.getInstance();
 		minimum.add(Calendar.YEAR, -2);
 		if (startDate.getTime() < minimum.getTimeInMillis()) {
-			// pour raison de performance, on limite à 2 ans (et non 2000 ans)
 			startDate = minimum.getTime();
 		}
 		if (startDate.getTime() > System.currentTimeMillis()) {
-			// pour raison de performance, on limite à aujourd'hui (et non 2000
-			// ans)
 			startDate = new Date();
 		}
 
@@ -83,8 +77,6 @@ final public class TimeRange implements Serializable {
 				endDate = new Date();
 			}
 			if (endDate.getTime() > System.currentTimeMillis()) {
-				// pour raison de performance, on limite à aujourd'hui (et non
-				// 2000 ans)
 				endDate = new Date();
 			}
 		} else {
@@ -94,8 +86,6 @@ final public class TimeRange implements Serializable {
 			endDate = startDate;
 		}
 
-		// la date de fin est incluse jusqu'à 23h59m59s
-		// (et le formatage de cette date reste donc au même jour)
 		final Calendar calendar = Calendar.getInstance();
 		calendar.setTime(endDate);
 		calendar.set(Calendar.HOUR_OF_DAY, 23);
@@ -136,16 +126,14 @@ final public class TimeRange implements Serializable {
 
 	public int getDurationDays() {
 		if (period == null) {
-			// attention endDate contient le dernier jour inclus jusqu'à
-			// 23h59m59s (cf parse),
-			// donc on ajoute 1s pour compter le dernier jour
 			return (int) ((endDate.getTime() + 1000 - startDate.getTime()) / MILLISECONDS_PER_DAY);
 		}
 		return period.getDurationDays();
 	}
 
-	/** {@inheritDoc} */
-	@Override
+	/**
+	 * @see java.lang.Object#toString()
+	 */
 	public String toString() {
 		return getClass().getSimpleName() + "[period=" + getPeriod() + ", startDate="
 		        + getStartDate() + ", endDate=" + getEndDate() + ']';

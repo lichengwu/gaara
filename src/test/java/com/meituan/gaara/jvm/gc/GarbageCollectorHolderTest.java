@@ -49,6 +49,7 @@ public class GarbageCollectorHolderTest {
 		new Object();
 		System.gc();
 		GarbageCollectorInfo gcHolder = GarbageCollectorInfo.getInstance();
+		gcHolder.refresh();
 		for(GarbageCollector gc : gcHolder.describe()){
 			System.out.println(gc.toString());
 		}

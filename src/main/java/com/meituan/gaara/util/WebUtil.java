@@ -35,7 +35,7 @@ final public class WebUtil {
 	 *
 	 * @return 获得当前应该的名字
 	 */
-	public static String getCurrentApplication(){
+	public static String getFullCurrentApplication(){
 		String contextPath = getContextPath(ParameterUtil.getServletContext());
 		if(contextPath==null || "".equals(contextPath)){
 			contextPath="unknown";

@@ -5,7 +5,9 @@
  */
 package com.meituan.gaara.collector.factory;
 
+import java.lang.reflect.Constructor;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,28 +16,32 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.meituan.gaara.collector.Collector;
-import com.meituan.gaara.collector.MemoryInfoCollector;
 import com.meituan.gaara.util.Parameter;
 import com.meituan.gaara.util.ParameterUtil;
 import com.meituan.gaara.util.WebUtil;
 
 /**
- * collector工厂
+ * 收集器工厂
  * 
  * @author lichengwu
  * @created 2012-2-16
  * 
- * @version 1.0
+ * @version 1.1
  */
-public class CollectorFactory {
+public class SimpleCollectorFactory {
 
-	private static final Log log = LogFactory.getLog(CollectorFactory.class);
+	private static final Log log = LogFactory.getLog(SimpleCollectorFactory.class);
 
 	public Map<String, Collector> registeredCollectors = new ConcurrentHashMap<String, Collector>();
 
-	private final static CollectorFactory INSTANCE = new CollectorFactory();
+	private final static SimpleCollectorFactory INSTANCE = new SimpleCollectorFactory();
 
-	private CollectorFactory() {
+	/**
+	 * 收集器所在的包
+	 */
+	private static String COLLECTOR_PACKAGE = "com.meituan.gaara.collector.";
+
+	private SimpleCollectorFactory() {
 		registerCollector();
 	}
 
@@ -68,15 +74,15 @@ public class CollectorFactory {
 	 * 
 	 * @author lichengwu
 	 * @created 2012-2-16
-	 *
+	 * 
 	 * @param collector名字
 	 * @return collector实例或者null(添加失败)
 	 */
 	public Collector addCollector(String collector) {
-		Collector c=null;
+		Collector c = null;
 		if (registeredCollectors.containsKey(collector)) {
-			log.warn("collector[" + collector + "] already exist,ignore...");
-			c=registeredCollectors.get(collector);
+			log.warn("collector[" + collector + "] already exist, ignored...");
+			c = registeredCollectors.get(collector);
 		} else {
 			c = newCollectorByName(collector);
 			if (c != null) {
@@ -98,11 +104,26 @@ public class CollectorFactory {
 	private Collector newCollectorByName(String name) {
 		assert name != null;
 		Collector collector = null;
-		if (name.equals(MemoryInfoCollector.class.getSimpleName())) {
-			collector = new MemoryInfoCollector(WebUtil.getCurrentApplication());
+		try {
+			Class<?> clazz = Class.forName(COLLECTOR_PACKAGE + name);
+			Constructor<?> constructor = clazz.getConstructor(String.class);
+			collector = (Collector) constructor.newInstance(WebUtil.getContextPath(ParameterUtil
+			        .getServletContext()));
+		} catch (InstantiationException e) {
+			log.error("make sure " + COLLECTOR_PACKAGE + name + " is an instance", e);
+		} catch (IllegalAccessException e) {
+			log.error("can not access " + COLLECTOR_PACKAGE + name, e);
+		} catch (ClassNotFoundException e) {
+			log.error("class not found:" + COLLECTOR_PACKAGE + name, e);
+		} catch (NoSuchMethodException e) {
+			log.error("can not found Constructor(String):" + COLLECTOR_PACKAGE + name, e);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 		}
 		if (collector == null) {
-			log.warn("can not create collector[" + name + "]");
+			log.error("can not create collector by name:" + name);
+		} else {
+			log.info("create new collector[" + name + "]");
 		}
 		return collector;
 	}
@@ -116,8 +137,7 @@ public class CollectorFactory {
 	 * @return 以类名为key，以collector为value的map
 	 */
 	public Map<String, Collector> getRegisteredCollectorMap() {
-		return registeredCollectors;
-		//return Collections.unmodifiableMap(registeredCollectors);
+		return Collections.unmodifiableMap(registeredCollectors);
 	}
 
 	/**
@@ -142,25 +162,32 @@ public class CollectorFactory {
 	 * 
 	 * @return
 	 */
-	public static CollectorFactory getInstance() {
+	public static SimpleCollectorFactory getInstance() {
 		return INSTANCE;
 	}
-	
+
 	/**
 	 * 删除collector
 	 * 
 	 * @author lichengwu
 	 * @created 2012-2-16
-	 *
-	 * @param collectName 收集器的名字
+	 * 
+	 * @param collectName
+	 *            收集器的名字
 	 * @return 当且仅当collector存在并且成功删除返回true，否则返回false
 	 */
 	public boolean removeCollector(String collectName) {
 		assert collectName != null;
 		synchronized (registeredCollectors) {
-	        Collector collector = registeredCollectors.remove(collectName);
-	        collector.destory();
-	        return collector == null;
-        }
+			Collector collector = registeredCollectors.remove(collectName);
+			if (collector != null) {
+				collector.destory();
+				collector = null;
+				log.info("remove collector[" + collectName + "] from system.");
+				return true;
+			}
+			log.warn("collector[" + collectName + "] does not exists, can not remove!");
+			return false;
+		}
 	}
 }
