@@ -23,6 +23,7 @@ import org.apache.commons.logging.LogFactory;
 
 import com.meituan.gaara.util.Closer;
 import com.meituan.gaara.util.I18N;
+import com.meituan.gaara.util.IOUtil;
 
 /**
  * 通过http收集数据
@@ -94,20 +95,32 @@ final public class HttpDataRetriever {
 		return result;
 	}
 
-	public void copyTo(HttpServletRequest httpRequest, HttpServletResponse httpResponse)
-	        throws IOException {
-		assert httpRequest != null;
-		assert httpResponse != null;
+	/**
+	 * 拷贝数据到响应流中
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-4
+	 * 
+	 * @param request
+	 *            HttpServletRequest
+	 * @param response
+	 *            HttpServletResponse
+	 * @throws IOException
+	 */
+	public void copyTo(HttpServletRequest request, HttpServletResponse response) throws IOException {
+		assert request != null;
+		assert response != null;
 		final URLConnection conn = openConnection();
-		conn.setRequestProperty("Accept-Language", httpRequest.getHeader("Accept-Language"));
+		conn.setRequestProperty("Accept-Language", request.getHeader("Accept-Language"));
 		conn.connect();
 		try {
-			InputStream input = conn.getInputStream();
+			InputStream in = conn.getInputStream();
 			if ("gzip".equals(conn.getContentEncoding())) {
-				input = new GZIPInputStream(input);
+				in = new GZIPInputStream(in);
 			}
-			httpResponse.setContentType(conn.getContentType());
-			// TransportFormat.pump(input, httpResponse.getOutputStream()); TODO
+			response.setContentType(conn.getContentType());
+			// 拷贝
+			IOUtil.pump(in, response.getOutputStream());
 		} finally {
 			Closer.closeUrlConnection(conn);
 		}
@@ -125,15 +138,23 @@ final public class HttpDataRetriever {
 	 * @throws IOException
 	 */
 	private Serializable read(URLConnection conn) throws IOException {
-		Object result = null;
+		Serializable result = null;
 		try {
 			InputStream in = conn.getInputStream();
 			if ("gzip".equalsIgnoreCase(conn.getContentEncoding())) {
 				in = new GZIPInputStream(in);
 			}
-			// 目前只支持序列化，TODO json，xml支持
-			ObjectInputStream ois = new ObjectInputStream(in);
-			result = ois.readObject();
+			String contentType = conn.getContentType();
+			// text
+			if (contentType.startsWith("text") || contentType.startsWith("application/json")) {
+				result = IOUtil.readString(in);
+			}
+			// Serializable
+			else {
+				ObjectInputStream ois = new ObjectInputStream(in);
+				result = (Serializable) ois.readObject();
+			}
+
 		} catch (ClassNotFoundException e) {
 			log.error(e.getMessage(), e);
 		} finally {
@@ -142,7 +163,7 @@ final public class HttpDataRetriever {
 				log.warn("error occur while closing URLConnection:" + errMsg);
 			}
 		}
-		return (Serializable) result;
+		return result;
 	}
 
 	/**
