@@ -80,7 +80,7 @@ public enum Parameter {
 	/**
 	 * 系统启动时间
 	 */
-	APPLICATION_START_TIME("gaara.application.start.time");
+	APPLICATION_START_TIME("gaara.start.time");
 
 	private String name;
 

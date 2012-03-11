@@ -40,7 +40,7 @@ public class SimpleLocalCollectorFactory {
 	/**
 	 * 收集器所在的包
 	 */
-	private static String COLLECTOR_PACKAGE = "com.meituan.gaara.collector.";
+	private static final String COLLECTOR_PACKAGE = "com.meituan.gaara.collector.";
 
 	private SimpleLocalCollectorFactory() {
 		registerCollector();

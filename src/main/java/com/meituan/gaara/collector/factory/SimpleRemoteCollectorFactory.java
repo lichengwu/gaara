@@ -6,8 +6,10 @@
 package com.meituan.gaara.collector.factory;
 
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -109,9 +111,56 @@ public final class SimpleRemoteCollectorFactory {
 		RemoteCollector remoteCollector = null;
 		try {
 			remoteCollector = new RemoteCollector(application, url);
+			remoteCollectorMap.put(remoteCollector.getApplication(), remoteCollector);
+			// 存入配置文件
+			String exists = ParameterUtil.getParameter(Parameter.REGISTERED_REMOTE_COLLECTOR);
+			exists = exists + ";" + application + "," + url;
+			ParameterUtil.storeCustomerProperties(Parameter.REGISTERED_REMOTE_COLLECTOR.getName(),
+			        exists);
 		} catch (MalformedURLException e) {
 			log.error("can not create remote collector[" + application + ":" + url + "]", e);
 		}
 		return remoteCollector;
+	}
+
+	/**
+	 * 删除远程收集器
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-11
+	 *
+	 * @param application 远程应用的名字
+	 */
+	public void removeCollector(String application) {
+		assert application != null;
+		//删除收集器
+		RemoteCollector collector = remoteCollectorMap.remove(application);
+		if (collector == null) {
+			log.warn("collector for application:" + application + " not exists");
+			return;
+		}
+		// 删除配置
+		String exists = ParameterUtil.getParameter(Parameter.REGISTERED_REMOTE_COLLECTOR);
+		if (exists != null) {
+			List<String> collectorInfo = new ArrayList<String>(Arrays.asList(exists.split(";")));
+			Iterator<String> itr = collectorInfo.iterator();
+			while (itr.hasNext()) {
+				String info = itr.next();
+				if (info.split(",")[0].equals(application)) {
+					itr.remove();
+					break;
+				}
+			}
+			StringBuilder config = new StringBuilder();
+			for (String info : collectorInfo) {
+				config.append(info).append(";");
+			}
+			if (config.length() > 1 && config.charAt(config.length() - 1) == ';') {
+				config.deleteCharAt(config.length() - 1);
+			}
+			//存储新的配置
+			ParameterUtil.storeCustomerProperties(Parameter.REGISTERED_REMOTE_COLLECTOR.getName(),
+			        config.toString());
+		}
 	}
 }

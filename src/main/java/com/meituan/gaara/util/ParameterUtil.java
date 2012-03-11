@@ -87,24 +87,7 @@ final public class ParameterUtil implements Serializable {
 	public static String getParameter(Parameter parameter) {
 		assert parameter != null;
 		String name = parameter.getName();
-		// 1.com/meituan/gaara/conf下所有properties文件读取
-		String value = properties.getProperty(name);
-		if (value != null) {
-			return value;
-		}
-		// 2.如果 servletContext不为空，读取初始化参数
-		if (servletContext != null) {
-			value = servletContext.getInitParameter(name);
-			if (value != null) {
-				return value;
-			}
-		}
-		// 3.从系统读取
-		value = System.getProperty(name);
-		if (value != null) {
-			return value;
-		}
-		return null;
+		return getParameter(name);
 	}
 
 	/**
@@ -141,21 +124,21 @@ final public class ParameterUtil implements Serializable {
 	public static String getParameter(String name) {
 		assert name != null;
 		// 1.com/meituan/gaara/conf下所有properties文件读取
-		String value = properties.getProperty(name);
+		Object value = properties.get(name);
 		if (value != null) {
-			return value;
+			return value.toString();
 		}
 		// 2.如果 servletContext不为空，读取初始化参数
 		if (servletContext != null) {
 			value = servletContext.getInitParameter(name);
 			if (value != null) {
-				return value;
+				return value.toString();
 			}
 		}
 		// 3.从系统读取
 		value = System.getProperty(name);
 		if (value != null) {
-			return value;
+			return value.toString();
 		}
 		return null;
 	}
