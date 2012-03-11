@@ -6,6 +6,7 @@
 package com.meituan.gaara.collector.factory;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -28,20 +29,20 @@ import com.meituan.gaara.util.WebUtil;
  * 
  * @version 1.1
  */
-public class SimpleCollectorFactory {
+public class SimpleLocalCollectorFactory {
 
-	private static final Log log = LogFactory.getLog(SimpleCollectorFactory.class);
+	private static final Log log = LogFactory.getLog(SimpleLocalCollectorFactory.class);
 
 	public Map<String, Collector> registeredCollectors = new ConcurrentHashMap<String, Collector>();
 
-	private final static SimpleCollectorFactory INSTANCE = new SimpleCollectorFactory();
+	private final static SimpleLocalCollectorFactory INSTANCE = new SimpleLocalCollectorFactory();
 
 	/**
 	 * 收集器所在的包
 	 */
-	private static String COLLECTOR_PACKAGE = "com.meituan.gaara.collector.";
+	private static final String COLLECTOR_PACKAGE = "com.meituan.gaara.collector.";
 
-	private SimpleCollectorFactory() {
+	private SimpleLocalCollectorFactory() {
 		registerCollector();
 	}
 
@@ -54,10 +55,10 @@ public class SimpleCollectorFactory {
 	 */
 	private void registerCollector() {
 		// 如果用户没有自定义collector，那么使用默认collector
-		String registeredName = ParameterUtil.getParameter(Parameter.REGISTERED_COLLECTORS);
+		String registeredName = ParameterUtil.getParameter(Parameter.REGISTERED_LOCAL_COLLECTORS);
 		if (registeredName == null || "".equals(registeredName)) {
 			registeredName = ParameterUtil.getParameter("gaara.default.collector");
-			ParameterUtil.storeCustomerProperties(Parameter.REGISTERED_COLLECTORS.getName(),
+			ParameterUtil.storeCustomerProperties(Parameter.REGISTERED_LOCAL_COLLECTORS.getName(),
 			        registeredName);
 		}
 		List<String> collectors = Arrays.asList(registeredName.split(","));
@@ -87,6 +88,14 @@ public class SimpleCollectorFactory {
 			c = newCollectorByName(collector);
 			if (c != null) {
 				registeredCollectors.put(c.getName(), c);
+				// 储存新添加的collector
+				String exists = ParameterUtil.getParameter(Parameter.REGISTERED_LOCAL_COLLECTORS);
+				List<String> list = Arrays.asList(exists.split(","));
+				if (!list.contains(c.getName())) {
+					ParameterUtil.storeCustomerProperties(
+					        Parameter.REGISTERED_LOCAL_COLLECTORS.getName(),
+					        exists + "," + c.getName());
+				}
 			}
 		}
 		return c;
@@ -136,7 +145,7 @@ public class SimpleCollectorFactory {
 	 * 
 	 * @return 以类名为key，以collector为value的map
 	 */
-	public Map<String, Collector> getRegisteredCollectorMap() {
+	public Map<String, Collector> getRegisteredLocalCollectorMap() {
 		return Collections.unmodifiableMap(registeredCollectors);
 	}
 
@@ -162,7 +171,7 @@ public class SimpleCollectorFactory {
 	 * 
 	 * @return
 	 */
-	public static SimpleCollectorFactory getInstance() {
+	public static SimpleLocalCollectorFactory getInstance() {
 		return INSTANCE;
 	}
 
@@ -182,6 +191,19 @@ public class SimpleCollectorFactory {
 			Collector collector = registeredCollectors.remove(collectName);
 			if (collector != null) {
 				collector.destory();
+				//删除配置
+				String exists = ParameterUtil.getParameter(Parameter.REGISTERED_LOCAL_COLLECTORS);
+				List<String> list = new ArrayList<String>(Arrays.asList(exists.split(",")));
+				list.remove(collector.getName());
+				StringBuilder newCollecot = new StringBuilder();
+				for (String collecor : list) {
+					newCollecot.append(collecor).append(",");
+				}
+				if (newCollecot.length() > 1 && newCollecot.charAt(newCollecot.length() - 1) == ',') {
+					newCollecot.deleteCharAt(newCollecot.length() - 1);
+				}
+				ParameterUtil.storeCustomerProperties(
+				        Parameter.REGISTERED_LOCAL_COLLECTORS.getName(), newCollecot.toString());
 				collector = null;
 				log.info("remove collector[" + collectName + "] from system.");
 				return true;

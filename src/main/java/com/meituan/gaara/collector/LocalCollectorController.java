@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.meituan.gaara.collector.factory.SimpleCollectorFactory;
+import com.meituan.gaara.collector.factory.SimpleLocalCollectorFactory;
 
 /**
  * 收集器控制器
@@ -70,7 +70,7 @@ public class LocalCollectorController {
 				}
 				// 如果正在收集，休息500ms
 				if (!collecting) {
-					SimpleCollectorFactory.getInstance().addCollector(collector);
+					SimpleLocalCollectorFactory.getInstance().addCollector(collector);
 					return true;
 				}
 				TimeUnit.MILLISECONDS.sleep(500);
@@ -102,7 +102,7 @@ public class LocalCollectorController {
 				}
 				// 如果正在收集，休息500ms
 				if (!collecting) {
-					SimpleCollectorFactory.getInstance().removeCollector(collector);
+					SimpleLocalCollectorFactory.getInstance().removeCollector(collector);
 					return true;
 				}
 				TimeUnit.MILLISECONDS.sleep(500);
@@ -125,9 +125,9 @@ public class LocalCollectorController {
 	public synchronized Serializable doCollect() {
 		collecting = true;
 		long start = System.currentTimeMillis();
-		log.info("start to collect JVM info...");
-		Map<String, Collector> registeredCollectorMap = SimpleCollectorFactory.getInstance()
-		        .getRegisteredCollectorMap();
+		log.info("start to collect info...");
+		Map<String, Collector> registeredCollectorMap = SimpleLocalCollectorFactory.getInstance()
+		        .getRegisteredLocalCollectorMap();
 		ArrayList<Serializable> collectedInfo = new ArrayList<Serializable>(
 		        registeredCollectorMap.size());
 		for (Entry<String, Collector> entry : registeredCollectorMap.entrySet()) {
@@ -135,7 +135,7 @@ public class LocalCollectorController {
 			collectedInfo.add(collector.collect());
 		}
 		collecting = false;
-		log.info("finish collect JVM info, cost " + (System.currentTimeMillis() - start) / 1000
+		log.info("finish collect info, cost " + (System.currentTimeMillis() - start) / 1000
 		        + "ms");
 		return collectedInfo;
 	}

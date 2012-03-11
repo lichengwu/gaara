@@ -28,7 +28,6 @@ public class LocalCollectorServer {
 	
 	
 	private LocalCollectorServer(){
-		
 	}
 
 	/**

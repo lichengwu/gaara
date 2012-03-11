@@ -68,14 +68,19 @@ public enum Parameter {
 	GAARA_RUN_MODE("gaara.run.mode"),
 
 	/**
-	 * 已注册的收集器
+	 * 已注册的本地收集器
 	 */
-	REGISTERED_COLLECTORS("gaara.registered.collectors"),
-	
+	REGISTERED_LOCAL_COLLECTORS("gaara.registered.local.collectors"),
+
+	/**
+	 * 已注册的远程收集器
+	 */
+	REGISTERED_REMOTE_COLLECTOR("gaara.registered.remote.collectors"),
+
 	/**
 	 * 系统启动时间
 	 */
-	APPLICATION_START_TIME("gaara.application.start.time");
+	APPLICATION_START_TIME("gaara.start.time");
 
 	private String name;
 
