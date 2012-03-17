@@ -46,7 +46,7 @@ public class GarbageCollectorInfoCollector extends DefaultInfoCollector {
 	 */
 	@Override
 	protected void initJRobin() throws GaaraException {
-		GarbageCollectorInfo gcInfo = GarbageCollectorInfo.getInstance();
+		GarbageCollectorInfo gcInfo = (GarbageCollectorInfo) getNewInfo();
 		if (gcInfo.refresh()) {
 			// 按照垃圾收集器的个数存储
 			List<GarbageCollector> describe = gcInfo.describe();

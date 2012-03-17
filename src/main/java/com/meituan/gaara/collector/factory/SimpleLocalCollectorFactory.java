@@ -110,7 +110,7 @@ public class SimpleLocalCollectorFactory {
 	 * @param name
 	 * @return
 	 */
-	private Collector newCollectorByName(String name) {
+	public static Collector newCollectorByName(String name) {
 		assert name != null;
 		Collector collector = null;
 		try {

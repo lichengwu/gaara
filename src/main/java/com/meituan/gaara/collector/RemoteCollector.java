@@ -6,14 +6,14 @@
 package com.meituan.gaara.collector;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.meituan.gaara.exception.GaaraException;
+import com.meituan.gaara.info.TransientInfo;
 import com.meituan.gaara.store.HttpDataRetriever;
 
 /**
@@ -24,14 +24,14 @@ import com.meituan.gaara.store.HttpDataRetriever;
  * 
  * @version 1.0
  */
-public class RemoteCollector {
+public class RemoteCollector extends DefaultInfoCollector {
 
 	private static final Log log = LogFactory.getLog(RemoteCollector.class);
 
 	/**
-	 * 远程应用的名字
+	 * 被装饰的collector
 	 */
-	private String application;
+	private DefaultInfoCollector collector;
 
 	private URL url;
 
@@ -42,8 +42,8 @@ public class RemoteCollector {
 	 *            远程应用url
 	 * @throws MalformedURLException
 	 */
-	public RemoteCollector(String application, String url) throws MalformedURLException {
-		this(application, new URL(url));
+	public RemoteCollector(DefaultInfoCollector collector, String url) throws MalformedURLException {
+		this(collector, new URL(url));
 	}
 
 	/**
@@ -52,32 +52,12 @@ public class RemoteCollector {
 	 * @param url
 	 *            远程应用url
 	 */
-	public RemoteCollector(String application, URL url) {
-		assert application != null;
-		assert url != null;
-		this.application = application;
+	public RemoteCollector(DefaultInfoCollector collector, URL url) {
+		super(collector.getApplication());
+		this.collector = collector;
 		this.url = url;
 	}
-
-	/**
-	 * 收集远程应用的监控信息
-	 * 
-	 * @author lichengwu
-	 * @created 2012-3-10
-	 * 
-	 * @return
-	 */
-	List<Serializable> collectRemoteApplication() {
-		List<Serializable> call = null;
-		try {
-			call = new HttpDataRetriever(url).call();
-		} catch (IOException e) {
-			log.error("can not collect remote application[" + application + ":" + url.toString()
-			        + "]", e);
-		}
-		return call;
-	}
-
+	
 	/**
 	 * 获取远程应用的名字
 	 * 
@@ -100,6 +80,49 @@ public class RemoteCollector {
 	 */
 	public URL getURL() {
 		return url;
+	}
+
+	/**
+	 * @see com.meituan.gaara.collector.Collector#getName()
+	 */
+	@Override
+	public String getName() {
+		return collector.getName();
+	}
+
+	/**
+	 * @see com.meituan.gaara.collector.DefaultInfoCollector#initJRobin()
+	 */
+	@Override
+	protected void initJRobin() throws GaaraException {
+		collector.initJRobin();
+	}
+
+	/**
+	 * @see com.meituan.gaara.collector.DefaultInfoCollector#saveInfo(com.meituan.gaara.info.TransientInfo)
+	 */
+	@Override
+	protected void saveInfo(TransientInfo info) throws GaaraException {
+		collector.saveInfo(info);
+	}
+
+	/**
+	 * 从远程获得信息
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-17
+	 * 
+	 */
+	@Override
+	protected TransientInfo getNewInfo() {
+		TransientInfo info = null;
+		try {
+			info = new HttpDataRetriever(url).call();
+		} catch (IOException e) {
+			log.error("can not collect remote application[" + application + ":" + url.toString()
+			        + "]", e);
+		}
+		return info;
 	}
 
 }

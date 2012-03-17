@@ -37,6 +37,11 @@ public abstract class DefaultInfoCollector implements Collector {
 	protected Map<String, JRobin> jRobinMap = new HashMap<String, JRobin>(0);
 
 	/**
+	 * JRobin延迟加载
+	 */
+	private boolean initJRobin = false;
+
+	/**
 	 * 获得gaara运行的模式
 	 */
 	protected boolean client = "client"
@@ -49,15 +54,6 @@ public abstract class DefaultInfoCollector implements Collector {
 
 	public DefaultInfoCollector(String application) {
 		this.application = application;
-		try {
-			// client模式不存储数据
-			if (!client) {
-				initJRobin();
-			}
-		} catch (GaaraException e) {
-			log.error("error occur while creating collector[" + getName() + "]:" + e.getMessage(),
-			        e);
-		}
 	}
 
 	/**
@@ -99,6 +95,19 @@ public abstract class DefaultInfoCollector implements Collector {
 			log.info("client mode does not store monitoring information");
 		} else {
 			try {
+				//JRobin延迟加载
+				if (!initJRobin) {
+					try {
+						// client模式不存储数据
+						if (!client) {
+							initJRobin();
+						}
+					} catch (GaaraException e) {
+						log.error(
+						        "error occur while creating collector[" + getName() + "]:"
+						                + e.getMessage(), e);
+					}
+				}
 				saveInfo(info);
 			} catch (GaaraException e) {
 				log.error("can not collect info from collector[" + getName() + "]", e);
@@ -106,6 +115,14 @@ public abstract class DefaultInfoCollector implements Collector {
 		}
 		return info;
 	}
+
+	/**
+	 * @see com.meituan.gaara.collector.Collector#getApplication()
+	 */
+	@Override
+	public String getApplication() {
+		return application;
+	};
 
 	/**
 	 * 将监控信息写入rrd文件

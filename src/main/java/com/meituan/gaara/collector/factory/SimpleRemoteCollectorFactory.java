@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.meituan.gaara.collector.DefaultInfoCollector;
 import com.meituan.gaara.collector.RemoteCollector;
 import com.meituan.gaara.util.Parameter;
 import com.meituan.gaara.util.ParameterUtil;
@@ -69,8 +70,12 @@ public final class SimpleRemoteCollectorFactory {
 		List<String> collectors = Arrays.asList(registeredName.split(";"));
 		for (String collector : collectors) {
 			String[] remoteInfo = collector.split(",");
+			String application=remoteInfo[0];
+			String url=remoteInfo[1];
+			String [] _collectors = remoteInfo[3].split("#");
+			//循环初始化 TODO
 			try {
-				RemoteCollector remoteCollector = new RemoteCollector(remoteInfo[0], remoteInfo[1]);
+				RemoteCollector remoteCollector = new RemoteCollector((DefaultInfoCollector) SimpleLocalCollectorFactory.newCollectorByName(""),"url");
 				remoteCollectorMap.put(remoteCollector.getApplication(), remoteCollector);
 			} catch (MalformedURLException e) {
 				log.error("can not init remote collector[" + remoteInfo[0] + ":" + remoteInfo[1]
@@ -109,17 +114,14 @@ public final class SimpleRemoteCollectorFactory {
 			return remoteCollectorMap.get(application);
 		}
 		RemoteCollector remoteCollector = null;
-		try {
-			remoteCollector = new RemoteCollector(application, url);
-			remoteCollectorMap.put(remoteCollector.getApplication(), remoteCollector);
-			// 存入配置文件
-			String exists = ParameterUtil.getParameter(Parameter.REGISTERED_REMOTE_COLLECTOR);
-			exists = exists + ";" + application + "," + url;
-			ParameterUtil.storeCustomerProperties(Parameter.REGISTERED_REMOTE_COLLECTOR.getName(),
-			        exists);
-		} catch (MalformedURLException e) {
-			log.error("can not create remote collector[" + application + ":" + url + "]", e);
-		}
+		//循环初始化 TODO
+        //remoteCollector = new RemoteCollector(application, url);
+        remoteCollectorMap.put(remoteCollector.getApplication(), remoteCollector);
+        // 存入配置文件
+        String exists = ParameterUtil.getParameter(Parameter.REGISTERED_REMOTE_COLLECTOR);
+        exists = exists + ";" + application + "," + url;
+        ParameterUtil.storeCustomerProperties(Parameter.REGISTERED_REMOTE_COLLECTOR.getName(),
+                exists);
 		return remoteCollector;
 	}
 

@@ -46,5 +46,15 @@ public interface Collector {
 	 * 
 	 */
 	void destory();
+	
+	/**
+	 * 获得应用的名字
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-17
+	 *
+	 * @return
+	 */
+	String getApplication();
 
 }
