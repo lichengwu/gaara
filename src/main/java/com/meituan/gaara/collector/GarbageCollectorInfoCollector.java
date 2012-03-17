@@ -46,23 +46,21 @@ public class GarbageCollectorInfoCollector extends DefaultInfoCollector {
 	 */
 	@Override
 	protected void initJRobin() throws GaaraException {
-		GarbageCollectorInfo gcInfo = GarbageCollectorInfo.getInstance();
-		if (gcInfo.refresh()) {
-			// 按照垃圾收集器的个数存储
-			List<GarbageCollector> describe = gcInfo.describe();
-			for (GarbageCollector gc : describe) {
-				if (gc.isValid()) {
-					// 吞吐量数据
-					jRobinMap.put(
-					        gc.getName() + " gc_throughputs",
-					        JRobin.createInstance(application,
-					                gc.getName() + " " + I18N.getString("gc_throughputs")));
-					// 平均gc暂停时间数据
-					jRobinMap.put(
-					        gc.getName() + " gc_average_pause_time",
-					        JRobin.createInstance(application,
-					                gc.getName() + " " + I18N.getString("gc_average_pause_time")));
-				}
+		GarbageCollectorInfo gcInfo = (GarbageCollectorInfo) info;
+		// 按照垃圾收集器的个数存储
+		List<GarbageCollector> describe = gcInfo.describe();
+		for (GarbageCollector gc : describe) {
+			if (gc.isValid()) {
+				// 吞吐量数据
+				jRobinMap.put(
+				        gc.getName() + " gc_throughputs",
+				        JRobin.createInstance(application,
+				                gc.getName() + " " + I18N.getString("gc_throughputs")));
+				// 平均gc暂停时间数据
+				jRobinMap.put(
+				        gc.getName() + " gc_average_pause_time",
+				        JRobin.createInstance(application,
+				                gc.getName() + " " + I18N.getString("gc_average_pause_time")));
 			}
 		}
 	}
@@ -83,7 +81,7 @@ public class GarbageCollectorInfoCollector extends DefaultInfoCollector {
 			        (applicationRuntime - gc.getCollectionTime()) * 100 / applicationRuntime);
 			// 平均gc暂停时间数据
 			jRobinMap.get(gc.getName() + " gc_average_pause_time").addValue(
-			        (gc.getCollectionTime()/Math.max(1, gc.getCollectionCount())));
+			        (gc.getCollectionTime() / Math.max(1, gc.getCollectionCount())));
 		}
 
 	}

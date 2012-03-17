@@ -6,14 +6,18 @@
 package com.meituan.gaara.collector;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.meituan.gaara.collector.factory.SimpleLocalCollectorFactory;
+import com.meituan.gaara.exception.GaaraException;
+import com.meituan.gaara.info.TransientInfo;
 import com.meituan.gaara.store.HttpDataRetriever;
 
 /**
@@ -27,6 +31,8 @@ import com.meituan.gaara.store.HttpDataRetriever;
 public class RemoteCollector {
 
 	private static final Log log = LogFactory.getLog(RemoteCollector.class);
+	
+	private Map<String, DefaultInfoCollector> collectorHandler = new ConcurrentHashMap<String, DefaultInfoCollector>();
 
 	/**
 	 * 远程应用的名字
@@ -66,16 +72,29 @@ public class RemoteCollector {
 	 * @created 2012-3-10
 	 * 
 	 * @return
+	 * @throws GaaraException 
 	 */
-	List<Serializable> collectRemoteApplication() {
-		List<Serializable> call = null;
+	public void collectRemoteApplication() throws GaaraException {
+		Map<String, TransientInfo> call = null;
 		try {
 			call = new HttpDataRetriever(url).call();
 		} catch (IOException e) {
 			log.error("can not collect remote application[" + application + ":" + url.toString()
 			        + "]", e);
 		}
-		return call;
+		
+		for(Entry<String, TransientInfo> entry : call.entrySet()){
+			String name = entry.getKey();
+			TransientInfo info = entry.getValue();
+			DefaultInfoCollector collector = collectorHandler.get(name);
+			if(collector==null){
+				collector = SimpleLocalCollectorFactory.newCollectorForRemote(name, info);
+				collectorHandler.put(name, collector);
+			}
+			collector.saveInfo(info);
+		}
+		
+		//return call;
 	}
 
 	/**

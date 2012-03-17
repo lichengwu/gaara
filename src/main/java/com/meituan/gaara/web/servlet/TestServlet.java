@@ -8,6 +8,14 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.jrobin.core.RrdException;
+
+import com.meituan.gaara.collector.Collector;
+import com.meituan.gaara.collector.MemoryInfoCollector;
+import com.meituan.gaara.collector.factory.SimpleLocalCollectorFactory;
+import com.meituan.gaara.store.JRobin;
+import com.meituan.gaara.util.Period;
+
 public class TestServlet extends HttpServlet {
 
 	/**
@@ -56,20 +64,7 @@ public class TestServlet extends HttpServlet {
 	 */
 	public void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-
-		response.setContentType("text/html");
-		PrintWriter out = response.getWriter();
-		out.println("<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\">");
-		out.println("<HTML>");
-		out.println("  <HEAD><TITLE>A Servlet</TITLE></HEAD>");
-		out.println("  <BODY>");
-		out.print("    This is ");
-		out.print(this.getClass());
-		out.println(", using the POST method");
-		out.println("  </BODY>");
-		out.println("</HTML>");
-		out.flush();
-		out.close();
+		
 	}
 
 

@@ -17,6 +17,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.meituan.gaara.collector.Collector;
+import com.meituan.gaara.collector.DefaultInfoCollector;
+import com.meituan.gaara.info.TransientInfo;
 import com.meituan.gaara.util.Parameter;
 import com.meituan.gaara.util.ParameterUtil;
 import com.meituan.gaara.util.WebUtil;
@@ -112,12 +114,54 @@ public class SimpleLocalCollectorFactory {
 	 */
 	private Collector newCollectorByName(String name) {
 		assert name != null;
-		Collector collector = null;
+		DefaultInfoCollector collector = null;
 		try {
 			Class<?> clazz = Class.forName(COLLECTOR_PACKAGE + name);
 			Constructor<?> constructor = clazz.getConstructor(String.class);
-			collector = (Collector) constructor.newInstance(WebUtil.getContextPath(ParameterUtil
-			        .getServletContext()));
+			collector = (DefaultInfoCollector) constructor.newInstance(WebUtil
+			        .getContextPath(ParameterUtil.getServletContext()));
+			// 初始化
+			collector.init();
+		} catch (InstantiationException e) {
+			log.error("make sure " + COLLECTOR_PACKAGE + name + " is an instance", e);
+		} catch (IllegalAccessException e) {
+			log.error("can not access " + COLLECTOR_PACKAGE + name, e);
+		} catch (ClassNotFoundException e) {
+			log.error("class not found:" + COLLECTOR_PACKAGE + name, e);
+		} catch (NoSuchMethodException e) {
+			log.error("can not found Constructor(String):" + COLLECTOR_PACKAGE + name, e);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		if (collector == null) {
+			log.error("can not create collector by name:" + name);
+		} else {
+			log.info("create new collector[" + name + "]");
+		}
+		return collector;
+	}
+
+	/**
+	 * 为远程信息提供收集器
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-17
+	 *
+	 * @param name 收集器名称
+	 * @param info 收集器手收集的信息
+	 * @return DefaultInfoCollector
+	 */
+	public static DefaultInfoCollector newCollectorForRemote(String name, TransientInfo info) {
+		assert name != null;
+		assert info != null;
+		DefaultInfoCollector collector = null;
+		try {
+			Class<?> clazz = Class.forName(COLLECTOR_PACKAGE + name);
+			Constructor<?> constructor = clazz.getConstructor(String.class);
+			collector = (DefaultInfoCollector) constructor.newInstance(WebUtil
+			        .getContextPath(ParameterUtil.getServletContext()));
+			// 初始化
+			collector.init(info);
 		} catch (InstantiationException e) {
 			log.error("make sure " + COLLECTOR_PACKAGE + name + " is an instance", e);
 		} catch (IllegalAccessException e) {
@@ -191,7 +235,7 @@ public class SimpleLocalCollectorFactory {
 			Collector collector = registeredCollectors.remove(collectName);
 			if (collector != null) {
 				collector.destory();
-				//删除配置
+				// 删除配置
 				String exists = ParameterUtil.getParameter(Parameter.REGISTERED_LOCAL_COLLECTORS);
 				List<String> list = new ArrayList<String>(Arrays.asList(exists.split(",")));
 				list.remove(collector.getName());

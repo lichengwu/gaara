@@ -28,6 +28,11 @@ public class LocalCollectorServer {
 	
 	
 	private LocalCollectorServer(){
+		timer = new Timer(true);
+	}
+	
+	public static LocalCollectorServer getInstance(){
+		return new LocalCollectorServer();
 	}
 
 	/**
@@ -44,7 +49,7 @@ public class LocalCollectorServer {
 			
 			@Override
 			public void run() {
-				
+				LocalCollectorController.getInstance().doCollect();
 			}
 		}, 500, interval);
 	}

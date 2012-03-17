@@ -6,7 +6,7 @@
 package com.meituan.gaara.collector;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
@@ -81,14 +81,15 @@ public class LocalCollectorController {
 			return false;
 		}
 	}
-	
+
 	/**
 	 * 将收集器从LocalCollectorController删除
 	 * 
 	 * @author lichengwu
 	 * @created 2012-3-3
-	 *
-	 * @param collector 收集器名字
+	 * 
+	 * @param collector
+	 *            收集器名字
 	 * @return 删除成功返回true，否则返回false
 	 */
 	public synchronized boolean romoveCollector(String collector) {
@@ -128,15 +129,13 @@ public class LocalCollectorController {
 		log.info("start to collect info...");
 		Map<String, Collector> registeredCollectorMap = SimpleLocalCollectorFactory.getInstance()
 		        .getRegisteredLocalCollectorMap();
-		ArrayList<Serializable> collectedInfo = new ArrayList<Serializable>(
-		        registeredCollectorMap.size());
+		HashMap<String, Serializable> collectedInfo = new HashMap<String, Serializable>();
 		for (Entry<String, Collector> entry : registeredCollectorMap.entrySet()) {
 			Collector collector = entry.getValue();
-			collectedInfo.add(collector.collect());
+			collectedInfo.put(collector.getClass().getSimpleName(), collector.collect());
 		}
 		collecting = false;
-		log.info("finish collect info, cost " + (System.currentTimeMillis() - start) / 1000
-		        + "ms");
+		log.info("finish collect info, cost " + (System.currentTimeMillis() - start) / 1000 + "ms");
 		return collectedInfo;
 	}
 
