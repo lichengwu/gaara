@@ -8,14 +8,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.jrobin.core.RrdException;
-
-import com.meituan.gaara.collector.Collector;
-import com.meituan.gaara.collector.MemoryInfoCollector;
-import com.meituan.gaara.collector.factory.SimpleLocalCollectorFactory;
-import com.meituan.gaara.store.JRobin;
-import com.meituan.gaara.util.Period;
-
 public class TestServlet extends HttpServlet {
 
 	/**

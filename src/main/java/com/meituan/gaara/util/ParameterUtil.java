@@ -258,7 +258,7 @@ final public class ParameterUtil implements Serializable {
 		FileReader reader = null;
 		try {
 			// gaara文件存储路径
-			File storageDirectory = FileUtil.getStorageDirectory(WebUtil.getFullCurrentApplication());
+			File storageDirectory = FileUtil.getStorageDirectory(WebUtil.getContextPath(servletContext));
 			FileUtil.ensureFilePath(storageDirectory);
 			File file = new File(storageDirectory.getCanonicalPath() + File.separator
 			        + "application.properties");
@@ -295,7 +295,7 @@ final public class ParameterUtil implements Serializable {
 		FileWriter writer = null;
 		try {
 			// gaara文件存储路径
-			File storageDirectory = FileUtil.getStorageDirectory(WebUtil.getFullCurrentApplication());
+			File storageDirectory = FileUtil.getStorageDirectory(WebUtil.getContextPath(servletContext));
 			FileUtil.ensureFilePath(storageDirectory);
 			File file = new File(storageDirectory.getCanonicalPath() + File.separator
 			        + "application.properties");

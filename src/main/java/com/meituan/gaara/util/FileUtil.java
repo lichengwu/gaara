@@ -109,7 +109,8 @@ final public class FileUtil {
 		}
 		// web app
 		if (ParameterUtil.getServletContext() != null) {
-			return new File(absolutePath + File.separator + application);
+			return new File(absolutePath + File.separator + application + "@"
+			        + ParameterUtil.getParameter(Parameter.HOST_NAME));
 		}
 		// 非web app 获得 servletContext==null
 		return new File(absolutePath);

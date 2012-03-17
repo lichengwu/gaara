@@ -7,6 +7,12 @@
 		<param-name>webAppRootKey</param-name>
 		<param-value>gaara</param-value>
 	</context-param>
+
+	<context-param>
+		<param-name>storage_directory</param-name>
+    	<param-value>E:\temp\gaara\</param-value>
+	</context-param>
+
   <servlet>
     <servlet-name>TestServlet</servlet-name>
     <servlet-class>com.meituan.gaara.web.servlet.TestServlet</servlet-class>
