@@ -313,10 +313,11 @@ final public class ParameterUtil implements Serializable {
 				file.createNewFile();
 			}
 			reader = new FileReader(file);
-			writer = new FileWriter(file);
 			Properties props = new Properties();
 			props.load(reader);
-			props.put(key, value);
+			props.list(System.out);
+			props.setProperty(key, String.valueOf(value));
+			writer = new FileWriter(file);
 			props.store(writer, "");
 			// 同时保存到当前的设置中
 			properties.put(key, value);

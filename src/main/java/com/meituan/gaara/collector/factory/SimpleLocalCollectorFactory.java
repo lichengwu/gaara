@@ -146,20 +146,25 @@ public class SimpleLocalCollectorFactory {
 	 * 
 	 * @author lichengwu
 	 * @created 2012-3-17
-	 *
-	 * @param name 收集器名称
-	 * @param info 收集器手收集的信息
+	 * 
+	 * @param name
+	 *            收集器名称
+	 * @param application
+	 *            应用名字
+	 * @param info
+	 *            收集器手收集的信息
 	 * @return DefaultInfoCollector
 	 */
-	public static DefaultInfoCollector newCollectorForRemote(String name, TransientInfo info) {
+	public static DefaultInfoCollector newCollectorForRemote(String name, String application,
+	        TransientInfo info) {
 		assert name != null;
 		assert info != null;
+		assert application != null;
 		DefaultInfoCollector collector = null;
 		try {
 			Class<?> clazz = Class.forName(COLLECTOR_PACKAGE + name);
 			Constructor<?> constructor = clazz.getConstructor(String.class);
-			collector = (DefaultInfoCollector) constructor.newInstance(WebUtil
-			        .getContextPath(ParameterUtil.getServletContext()));
+			collector = (DefaultInfoCollector) constructor.newInstance(application);
 			// 初始化
 			collector.init(info);
 		} catch (InstantiationException e) {

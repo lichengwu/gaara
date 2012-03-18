@@ -6,7 +6,6 @@
 package com.meituan.gaara.collector;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Timer;
@@ -15,6 +14,7 @@ import java.util.TimerTask;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.meituan.gaara.collector.factory.SimpleRemoteCollectorFactory;
 import com.meituan.gaara.exception.GaaraException;
 import com.meituan.gaara.util.Parameter;
 import com.meituan.gaara.util.ParameterUtil;
@@ -31,10 +31,6 @@ public class CollectorServer {
 
 	private static final Log log = LogFactory.getLog(CollectorServer.class);
 
-	/**
-	 * 远程收集器
-	 */
-	private final Map<String, RemoteCollector> remoteCollectorMap = new HashMap<String, RemoteCollector>();
 	
 	private static CollectorServer INSTANCE = new CollectorServer();
 	
@@ -92,6 +88,7 @@ public class CollectorServer {
 				// 搜集本地
 				recentInfo = LocalCollectorController.getInstance().doCollect();
 				// 收集远程
+				Map<String, RemoteCollector> remoteCollectorMap = SimpleRemoteCollectorFactory.getInstance().getRegisteredRemoteCollectorMap();
 				if (!remoteCollectorMap.isEmpty()) {
 					for (Entry<String, RemoteCollector> entry : remoteCollectorMap.entrySet()) {
 						RemoteCollector remoteCollector = entry.getValue();

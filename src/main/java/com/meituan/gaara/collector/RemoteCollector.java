@@ -64,7 +64,7 @@ public class RemoteCollector {
 		this.application = application;
 		this.url = url;
 	}
-	
+
 	/**
 	 * 收集远程应用的监控信息
 	 * 
@@ -83,12 +83,13 @@ public class RemoteCollector {
 		}
 		// 收集所有信息
 		for (Entry<String, TransientInfo> entry : call.entrySet()) {
-			String name = entry.getKey();
+			String collectorName = entry.getKey();
 			TransientInfo info = entry.getValue();
-			DefaultInfoCollector collector = collectorHandler.get(name);
+			DefaultInfoCollector collector = collectorHandler.get(collectorName);
 			if (collector == null) {
-				collector = SimpleLocalCollectorFactory.newCollectorForRemote(name, info);
-				collectorHandler.put(name, collector);
+				collector = SimpleLocalCollectorFactory.newCollectorForRemote(collectorName,
+				        application, info);
+				collectorHandler.put(collectorName, collector);
 			}
 			collector.saveInfo(info);
 		}

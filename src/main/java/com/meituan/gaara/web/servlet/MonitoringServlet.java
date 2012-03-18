@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.meituan.gaara.collector.CollectorServer;
+import com.meituan.gaara.collector.factory.SimpleRemoteCollectorFactory;
 import com.meituan.gaara.util.I18N;
 import com.meituan.gaara.util.ParameterUtil;
 import com.meituan.gaara.util.ServletUtil;
@@ -56,6 +57,7 @@ public class MonitoringServlet extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	        throws ServletException, IOException {
 		I18N.bindLocale(request.getLocale());
+		SimpleRemoteCollectorFactory.getInstance().addCollector("gaara_test", "http://localhost:8080/gt/gaara");
 		I18N.unbindLocale();
 	}
 

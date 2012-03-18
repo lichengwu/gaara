@@ -5,6 +5,9 @@
  */
 package com.meituan.gaara.info;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
@@ -176,6 +179,19 @@ final public class GarbageCollectorInfo implements TransientInfo, Serializable {
 	@Override
 	public long lastUpdate() {
 		return lastUpdate;
+	}
+	
+	//下面两个方法用于“冷藏”和“解冻”
+	
+	private void writeObject(ObjectOutputStream out) throws IOException {
+		out.writeLong(lastUpdate);
+		out.writeObject(gcList);
+	}
+
+	@SuppressWarnings("unchecked")
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		this.lastUpdate=in.readLong();
+		this.gcList = (List<GarbageCollector>) in.readObject();
 	}
 
 }

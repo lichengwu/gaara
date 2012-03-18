@@ -114,7 +114,12 @@ public final class SimpleRemoteCollectorFactory {
 			remoteCollectorMap.put(remoteCollector.getApplication(), remoteCollector);
 			// 存入配置文件
 			String exists = ParameterUtil.getParameter(Parameter.REGISTERED_REMOTE_COLLECTOR);
-			exists = exists + ";" + application + "," + url;
+			if(exists==null){
+				exists = application + "," + url;
+			}else{
+				exists = exists + ";" + application + "," + url;
+			}
+			
 			ParameterUtil.storeCustomerProperties(Parameter.REGISTERED_REMOTE_COLLECTOR.getName(),
 			        exists);
 		} catch (MalformedURLException e) {
