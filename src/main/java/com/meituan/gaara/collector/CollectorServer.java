@@ -14,7 +14,7 @@ import java.util.TimerTask;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.meituan.gaara.collector.factory.SimpleRemoteCollectorFactory;
+import com.meituan.gaara.collector.factory.RemoteCollectorFactory;
 import com.meituan.gaara.exception.GaaraException;
 import com.meituan.gaara.util.Parameter;
 import com.meituan.gaara.util.ParameterUtil;
@@ -125,7 +125,7 @@ public class CollectorServer {
 	 * 
 	 */
 	private void collectRemoteApllications() {
-		Map<String, RemoteCollector> remoteCollectorMap = SimpleRemoteCollectorFactory
+		Map<String, RemoteCollector> remoteCollectorMap = RemoteCollectorFactory
 		        .getInstance().getRegisteredRemoteCollectorMap();
 		if (!remoteCollectorMap.isEmpty()) {
 			for (Entry<String, RemoteCollector> entry : remoteCollectorMap.entrySet()) {

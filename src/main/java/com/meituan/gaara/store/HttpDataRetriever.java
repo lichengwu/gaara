@@ -96,7 +96,7 @@ final public class HttpDataRetriever {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * 以GET方式获取数据
 	 * 
@@ -172,7 +172,9 @@ final public class HttpDataRetriever {
 			}
 			String contentType = conn.getContentType();
 			// text
-			if (contentType.startsWith("text") || contentType.startsWith("application/json")) {
+			if (contentType != null
+			        && (contentType.startsWith("text") || contentType
+			                .startsWith("application/json"))) {
 				result = IOUtil.readString(in);
 			}
 			// Serializable

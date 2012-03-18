@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.meituan.gaara.collector.MemoryInfoCollector;
-import com.meituan.gaara.collector.factory.SimpleLocalCollectorFactory;
+import com.meituan.gaara.collector.factory.LocalCollectorFactory;
 import com.meituan.gaara.exception.GaaraException;
 import com.meituan.gaara.store.JRobin;
 import com.meituan.gaara.util.Period;
@@ -44,7 +44,7 @@ public class GraphServeltTest extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	        throws ServletException, IOException {
 		String graphName = request.getParameter("name");
-		MemoryInfoCollector collector = (MemoryInfoCollector) SimpleLocalCollectorFactory
+		MemoryInfoCollector collector = (MemoryInfoCollector) LocalCollectorFactory
 		        .getInstance().getCollector(MemoryInfoCollector.class.getSimpleName());
 		JRobin jRobin = collector.getJRobin(graphName);
 		if (jRobin != null) {

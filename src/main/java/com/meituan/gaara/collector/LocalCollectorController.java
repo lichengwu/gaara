@@ -14,7 +14,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.meituan.gaara.collector.factory.SimpleLocalCollectorFactory;
+import com.meituan.gaara.collector.factory.LocalCollectorFactory;
 
 /**
  * 收集器控制器
@@ -70,7 +70,7 @@ public class LocalCollectorController {
 				}
 				// 如果正在收集，休息500ms
 				if (!collecting) {
-					SimpleLocalCollectorFactory.getInstance().addCollector(collector);
+					LocalCollectorFactory.getInstance().addCollector(collector);
 					return true;
 				}
 				TimeUnit.MILLISECONDS.sleep(500);
@@ -103,7 +103,7 @@ public class LocalCollectorController {
 				}
 				// 如果正在收集，休息500ms
 				if (!collecting) {
-					SimpleLocalCollectorFactory.getInstance().removeCollector(collector);
+					LocalCollectorFactory.getInstance().removeCollector(collector);
 					return true;
 				}
 				TimeUnit.MILLISECONDS.sleep(500);
@@ -127,7 +127,7 @@ public class LocalCollectorController {
 		collecting = true;
 		long start = System.currentTimeMillis();
 		log.info("start to collect info...");
-		Map<String, Collector> registeredCollectorMap = SimpleLocalCollectorFactory.getInstance()
+		Map<String, Collector> registeredCollectorMap = LocalCollectorFactory.getInstance()
 		        .getRegisteredLocalCollectorMap();
 		HashMap<String, Serializable> collectedInfo = new HashMap<String, Serializable>();
 		for (Entry<String, Collector> entry : registeredCollectorMap.entrySet()) {
@@ -135,7 +135,7 @@ public class LocalCollectorController {
 			collectedInfo.put(collector.getClass().getSimpleName(), collector.collect());
 		}
 		collecting = false;
-		log.info("finish collect info, cost " + (System.currentTimeMillis() - start) / 1000 + "ms");
+		log.info("finish collect info, time uesd: " + (System.currentTimeMillis() - start) + "ms");
 		return collectedInfo;
 	}
 

@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.meituan.gaara.collector.factory.SimpleLocalCollectorFactory;
+import com.meituan.gaara.collector.factory.LocalCollectorFactory;
 import com.meituan.gaara.exception.GaaraException;
 import com.meituan.gaara.info.TransientInfo;
 import com.meituan.gaara.store.HttpDataRetriever;
@@ -90,13 +90,13 @@ public class RemoteCollector {
 			TransientInfo info = entry.getValue();
 			DefaultInfoCollector collector = collectorHandler.get(collectorName);
 			if (collector == null) {
-				collector = SimpleLocalCollectorFactory.newCollectorForRemote(collectorName,
+				collector = LocalCollectorFactory.newCollectorForRemote(collectorName,
 				        application, info);
 				collectorHandler.put(collectorName, collector);
 			}
 			collector.saveInfo(info);
 		}
-		log.info("finish collect remote application:" + application + ", timeused:"
+		log.info("finish collect remote application:" + application + ", time used: "
 		        + (System.currentTimeMillis() - begin) + "ms");
 	}
 
@@ -122,6 +122,21 @@ public class RemoteCollector {
 	 */
 	public URL getURL() {
 		return url;
+	}
+	
+	/**
+	 * 消耗远程收集器
+	 * <p>
+	 * 递归消耗远程收集器的rrd信息，及注册信息。
+	 * </p>
+	 * @author lichengwu
+	 * @created 2012-3-18
+	 *
+	 */
+	public synchronized void destory(){
+		for(Entry<String, DefaultInfoCollector> entry : collectorHandler.entrySet()){
+			entry.getValue().destory();
+		}
 	}
 
 }

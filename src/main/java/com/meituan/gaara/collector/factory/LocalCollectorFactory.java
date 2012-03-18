@@ -24,27 +24,27 @@ import com.meituan.gaara.util.ParameterUtil;
 import com.meituan.gaara.util.WebUtil;
 
 /**
- * 收集器工厂
+ * 本地收集器工厂
  * 
  * @author lichengwu
  * @created 2012-2-16
  * 
  * @version 1.1
  */
-public class SimpleLocalCollectorFactory {
+public class LocalCollectorFactory {
 
-	private static final Log log = LogFactory.getLog(SimpleLocalCollectorFactory.class);
+	private static final Log log = LogFactory.getLog(LocalCollectorFactory.class);
 
 	public Map<String, Collector> registeredCollectors = new ConcurrentHashMap<String, Collector>();
 
-	private final static SimpleLocalCollectorFactory INSTANCE = new SimpleLocalCollectorFactory();
+	private final static LocalCollectorFactory INSTANCE = new LocalCollectorFactory();
 
 	/**
 	 * 收集器所在的包
 	 */
 	private static final String COLLECTOR_PACKAGE = "com.meituan.gaara.collector.";
 
-	private SimpleLocalCollectorFactory() {
+	private LocalCollectorFactory() {
 		//server模式不收集本地资源
 		if(!"server".equals(ParameterUtil.getParameter(Parameter.GAARA_RUN_MODE))){
 			registerCollector();
@@ -103,7 +103,7 @@ public class SimpleLocalCollectorFactory {
 				}
 				log.info("register new local collector [" + collector + "]");
 			} else {
-				log.warn("can not create local collector [" + collector + "]");
+				log.warn("can not register local collector [" + collector + "]");
 			}
 		}
 		return c;
@@ -140,9 +140,9 @@ public class SimpleLocalCollectorFactory {
 			log.error(e.getMessage(), e);
 		}
 		if (collector == null) {
-			log.error("can not create collector by name:" + name);
+			log.error("can not create local collector by name:" + name);
 		} else {
-			log.info("create new collector[" + name + "]");
+			log.info("create new local collector [" + name + "]");
 		}
 		return collector;
 	}
@@ -185,9 +185,9 @@ public class SimpleLocalCollectorFactory {
 			log.error(e.getMessage(), e);
 		}
 		if (collector == null) {
-			log.error("can not create collector by name:" + name);
+			log.error("can not create collector [" + name+"] for application : "+application);
 		} else {
-			log.info("create new collector[" + name + "] for [" + application + "]");
+			log.info("create new collector[" + name + "] for application [" + application + "]");
 		}
 		return collector;
 	}
@@ -226,7 +226,7 @@ public class SimpleLocalCollectorFactory {
 	 * 
 	 * @return
 	 */
-	public static SimpleLocalCollectorFactory getInstance() {
+	public static LocalCollectorFactory getInstance() {
 		return INSTANCE;
 	}
 

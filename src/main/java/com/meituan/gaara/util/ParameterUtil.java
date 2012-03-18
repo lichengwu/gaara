@@ -73,8 +73,8 @@ final public class ParameterUtil implements Serializable {
 	 * 获得参数值
 	 * <p>
 	 * <b>读取参数顺序:</b><br />
-	 * 1.com/meituan/gaara/conf下所有properties文件。<br />
-	 * 2.读取{@link ServletContext#getInitParameter(String)}。<br />
+	 * 1.读取{@link ServletContext#getInitParameter(String)}。<br />
+	 * 2.com/meituan/gaara/conf下所有properties文件。<br />
 	 * 3.{@link System#getProperty(String)}。
 	 * 
 	 * @author lichengwu
@@ -316,7 +316,6 @@ final public class ParameterUtil implements Serializable {
 			reader = new FileReader(file);
 			Properties props = new Properties();
 			props.load(reader);
-			props.list(System.out);
 			props.setProperty(key, String.valueOf(value));
 			writer = new FileWriter(file);
 			props.store(writer, "");
