@@ -6,12 +6,12 @@
 package com.meituan.gaara.collector.factory;
 
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
@@ -29,16 +29,19 @@ import com.meituan.gaara.util.ParameterUtil;
  * 
  * @version 1.0
  */
-public final class SimpleRemoteCollectorFactory {
+public final class RemoteCollectorFactory {
 
-	private static final Log log = LogFactory.getLog(SimpleRemoteCollectorFactory.class);
+	private static final Log log = LogFactory.getLog(RemoteCollectorFactory.class);
 
 	private Map<String, RemoteCollector> remoteCollectorMap = new ConcurrentHashMap<String, RemoteCollector>();
 
-	private static SimpleRemoteCollectorFactory INSTANCE = new SimpleRemoteCollectorFactory();
+	private static RemoteCollectorFactory INSTANCE = new RemoteCollectorFactory();
 
-	private SimpleRemoteCollectorFactory() {
-		initRemoteCollector();
+	private RemoteCollectorFactory() {
+		// cilent模式不收集远程信息
+		if (!"client".equals(ParameterUtil.getParameter(Parameter.GAARA_RUN_MODE))) {
+			initRemoteCollector();
+		}
 	}
 
 	/**
@@ -49,7 +52,7 @@ public final class SimpleRemoteCollectorFactory {
 	 * 
 	 * @return 远程收集器工厂实例
 	 */
-	public static SimpleRemoteCollectorFactory getInstance() {
+	public static RemoteCollectorFactory getInstance() {
 		return INSTANCE;
 	}
 
@@ -63,10 +66,11 @@ public final class SimpleRemoteCollectorFactory {
 	private void initRemoteCollector() {
 		String registeredName = ParameterUtil.getParameter(Parameter.REGISTERED_REMOTE_COLLECTOR);
 		if (registeredName == null || "".equals(registeredName)) {
-			log.info("this no remote collector...");
+			log.warn("this is no remote collector...");
 			return;
 		}
-		List<String> collectors = Arrays.asList(registeredName.split(";"));
+		log.info("start init remote collector...");
+		Set<String> collectors = new HashSet<String>(Arrays.asList(registeredName.split(";")));
 		for (String collector : collectors) {
 			String[] remoteInfo = collector.split(",");
 			try {
@@ -77,6 +81,7 @@ public final class SimpleRemoteCollectorFactory {
 				        + "]", e);
 			}
 		}
+		log.info("finish init remote collector...");
 	}
 
 	/**
@@ -103,9 +108,9 @@ public final class SimpleRemoteCollectorFactory {
 	 *            远程应用的url
 	 * @return RemoteCollector
 	 */
-	public RemoteCollector addCollector(String application, String url) {
+	public RemoteCollector addRemoteCollector(String application, String url) {
 		if (remoteCollectorMap.containsKey(application)) {
-			log.info("remote collector[" + application + ":" + url + "] already exists");
+			log.info("remote collector [" + application + ":" + url + "] already exists");
 			return remoteCollectorMap.get(application);
 		}
 		RemoteCollector remoteCollector = null;
@@ -114,9 +119,16 @@ public final class SimpleRemoteCollectorFactory {
 			remoteCollectorMap.put(remoteCollector.getApplication(), remoteCollector);
 			// 存入配置文件
 			String exists = ParameterUtil.getParameter(Parameter.REGISTERED_REMOTE_COLLECTOR);
-			exists = exists + ";" + application + "," + url;
+			if (exists == null) {
+				exists = application + "," + url;
+			} else {
+				exists = exists + ";" + application + "," + url;
+			}
+
 			ParameterUtil.storeCustomerProperties(Parameter.REGISTERED_REMOTE_COLLECTOR.getName(),
 			        exists);
+			log.info("add remote controller [" + application + ":" + url.toString()
+			        + "] successfull");
 		} catch (MalformedURLException e) {
 			log.error("can not create remote collector[" + application + ":" + url + "]", e);
 		}
@@ -128,21 +140,22 @@ public final class SimpleRemoteCollectorFactory {
 	 * 
 	 * @author lichengwu
 	 * @created 2012-3-11
-	 *
-	 * @param application 远程应用的名字
+	 * 
+	 * @param application
+	 *            远程应用的名字
 	 */
 	public void removeCollector(String application) {
 		assert application != null;
-		//删除收集器
+		// 删除收集器
 		RemoteCollector collector = remoteCollectorMap.remove(application);
 		if (collector == null) {
-			log.warn("collector for application:" + application + " not exists");
+			log.warn("remote collector for application:" + application + " not exists");
 			return;
 		}
 		// 删除配置
 		String exists = ParameterUtil.getParameter(Parameter.REGISTERED_REMOTE_COLLECTOR);
 		if (exists != null) {
-			List<String> collectorInfo = new ArrayList<String>(Arrays.asList(exists.split(";")));
+			Set<String> collectorInfo = new HashSet<String>(Arrays.asList(exists.split(";")));
 			Iterator<String> itr = collectorInfo.iterator();
 			while (itr.hasNext()) {
 				String info = itr.next();
@@ -158,9 +171,14 @@ public final class SimpleRemoteCollectorFactory {
 			if (config.length() > 1 && config.charAt(config.length() - 1) == ';') {
 				config.deleteCharAt(config.length() - 1);
 			}
-			//存储新的配置
+			// 存储新的配置
 			ParameterUtil.storeCustomerProperties(Parameter.REGISTERED_REMOTE_COLLECTOR.getName(),
 			        config.toString());
+			// 消耗相关信息
+			collector.destory();
+			log.info("remove remote controller [" + application + ":"
+			        + collector.getURL().toString() + "] successfull");
+			collector = null;
 		}
 	}
 }

@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Map;
@@ -73,7 +74,7 @@ final public class HttpDataRetriever {
 	}
 
 	/**
-	 * 获取数据
+	 * 以POST方式获取数据
 	 * 
 	 * @author lichengwu
 	 * @created 2012-3-4
@@ -83,9 +84,34 @@ final public class HttpDataRetriever {
 	 * @throws IOException
 	 */
 	@SuppressWarnings("unchecked")
-	public <T> T call() throws IOException {
+	public <T> T callPost() throws IOException {
 		T result = null;
-		URLConnection conn = openConnection();
+		HttpURLConnection conn = (HttpURLConnection) openConnection();
+		conn.setRequestMethod("POST");
+		conn.connect();
+		result = (T) read(conn);
+		if (result instanceof Throwable) {
+			Throwable error = (Throwable) result;
+			throw new IOException(error);
+		}
+		return result;
+	}
+
+	/**
+	 * 以GET方式获取数据
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-17
+	 * 
+	 * @param <T>
+	 * @return
+	 * @throws IOException
+	 */
+	@SuppressWarnings("unchecked")
+	public <T> T callGet() throws IOException {
+		T result = null;
+		HttpURLConnection conn = (HttpURLConnection) openConnection();
+		conn.setRequestMethod("POST");
 		conn.connect();
 		result = (T) read(conn);
 		if (result instanceof Throwable) {
@@ -146,7 +172,9 @@ final public class HttpDataRetriever {
 			}
 			String contentType = conn.getContentType();
 			// text
-			if (contentType.startsWith("text") || contentType.startsWith("application/json")) {
+			if (contentType != null
+			        && (contentType.startsWith("text") || contentType
+			                .startsWith("application/json"))) {
 				result = IOUtil.readString(in);
 			}
 			// Serializable

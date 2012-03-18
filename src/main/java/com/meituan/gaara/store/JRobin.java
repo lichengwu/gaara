@@ -130,7 +130,7 @@ public final class JRobin {
 		if (!FileUtil.ensureFilePath(rrdDir)) {
 			throw new IOException("can not create rrd directory:" + rrdDir.getCanonicalPath());
 		}
-		if (rrdFile.exists() || rrdFile.length() == 0) {
+		if (!rrdFile.exists() || rrdFile.length() == 0) {
 			RrdDef rrdDef = new RrdDef(rrdFileName, step);
 			rrdDef.setStartTime(Util.getTime() - step);
 			rrdDef.addDatasource(getDataSourceName(), DsTypes.DT_GAUGE, step * 2, 0, Double.NaN);
@@ -184,10 +184,9 @@ public final class JRobin {
 	 * @param height
 	 *            高度
 	 * @return 图片的二进制表示
-	 * @throws IOException
-	 * @throws RrdException
+	 * @throws GaaraException 
 	 */
-	public byte[] graph(TimeRange range, int width, int height) throws IOException, RrdException {
+	public byte[] graph(TimeRange range, int width, int height) throws GaaraException {
 		try {
 			// create common part of graph definition
 			RrdGraphDef graphDef = new RrdGraphDef();
@@ -205,9 +204,11 @@ public final class JRobin {
 			graphDef.setFilename("-");
 			graphDef.setPoolUsed(true);
 			return new RrdGraph(graphDef).getRrdGraphInfo().getBytes();
-		} catch (final RrdException e) {
-			throw e;
-		}
+		} catch (RrdException e) {
+			throw new GaaraException(e);
+		} catch (IOException e) {
+			throw new GaaraException(e);
+        }
 	}
 
 	/**
@@ -441,7 +442,7 @@ public final class JRobin {
 	 * @author lichengwu
 	 * @created 2012-2-14
 	 *
-	 * @return
+	 * @return 删除成功返回true，否则返回false
 	 */
 	public boolean delete(){
 		return FileUtil.delete(rrdFileName);

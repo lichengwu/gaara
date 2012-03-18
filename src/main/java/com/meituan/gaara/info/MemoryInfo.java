@@ -5,6 +5,9 @@
  */
 package com.meituan.gaara.info;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryPoolMXBean;
@@ -38,7 +41,7 @@ public class MemoryInfo implements TransientInfo {
 	private MemoryPoolMXBean survivorPoolMXBean;
 
 	private MemoryMXBean memoryMXBean;
-	
+
 	/**
 	 * 单例
 	 */
@@ -113,16 +116,16 @@ public class MemoryInfo implements TransientInfo {
 		load();
 		lastUpdate = System.currentTimeMillis();
 	}
-	
+
 	/**
 	 * 获得内存信息实例
 	 * 
 	 * @author lichengwu
 	 * @created 2012-3-3
-	 *
+	 * 
 	 * @return 内存信息实例
 	 */
-	public static MemoryInfo getInstance(){
+	public static MemoryInfo getInstance() {
 		return INSTANCE;
 	}
 
@@ -367,5 +370,38 @@ public class MemoryInfo implements TransientInfo {
 	@Override
 	public long lastUpdate() {
 		return lastUpdate;
+	}
+
+	// 下面两个方法用于“冷藏”和“解冻”
+
+	private void writeObject(ObjectOutputStream out) throws IOException {
+		out.writeLong(lastUpdate);
+		out.writeLong(usedHeapSize);
+		out.writeLong(maxHeapSize);
+		out.writeLong(usedPermGenSize);
+		out.writeLong(maxPermGenSize);
+		out.writeLong(usedOldGenSize);
+		out.writeLong(maxOldGenSize);
+		out.writeLong(usedEdenSize);
+		out.writeLong(maxEdenSize);
+		out.writeLong(usedSurvivorSize);
+		out.writeLong(maxSurvivorSize);
+		out.writeLong(usedNoHeapMaxSize);
+		out.writeLong(maxNoHeapSize);
+	}
+
+	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+		this.lastUpdate = in.readLong();
+		this.usedHeapSize = in.readLong();
+		this.maxHeapSize = in.readLong();
+		this.usedPermGenSize = in.readLong();
+		this.maxPermGenSize = in.readLong();
+		this.usedOldGenSize = in.readLong();
+		this.maxOldGenSize = in.readLong();
+		this.maxEdenSize = in.readLong();
+		this.usedSurvivorSize = in.readLong();
+		this.maxSurvivorSize = in.readLong();
+		this.usedNoHeapMaxSize = in.readLong();
+		this.maxNoHeapSize = in.readLong();
 	}
 }

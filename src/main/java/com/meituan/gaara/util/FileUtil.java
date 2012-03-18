@@ -22,6 +22,8 @@ final public class FileUtil {
 	 */
 	public static File TEMP_DIR = new File(System.getProperty("java.io.tmpdir"));
 
+	private static String BASE_RESOURCES_PATH = "/com/meituan/gaara/";
+
 	private static final String DEFAULT_DIR = "gaara";
 
 	/**
@@ -109,7 +111,8 @@ final public class FileUtil {
 		}
 		// web app
 		if (ParameterUtil.getServletContext() != null) {
-			return new File(absolutePath + File.separator + application);
+			return new File(absolutePath + File.separator + application + "@"
+			        + ParameterUtil.getParameter(Parameter.HOST_NAME));
 		}
 		// 非web app 获得 servletContext==null
 		return new File(absolutePath);
@@ -131,7 +134,7 @@ final public class FileUtil {
 		if (fileName.startsWith("/")) {
 			fileName = fileName.substring(1);
 		}
-		return FileUtil.class.getResource("/com/meituan/gaara/resources/" + fileName).getFile();
+		return BASE_RESOURCES_PATH + fileName;
 	}
 
 	/**
@@ -143,10 +146,12 @@ final public class FileUtil {
 	 * @return 配置文件的路径
 	 */
 	public static String getConfigPath() {
-		return FileUtil.class.getResource("/com/meituan/gaara/conf/").getFile();
+		return getResourcePath("conf/");
 	}
-	
+
 	public static void main(String[] args) {
-		System.out.println(new File("E:/war2.rar").mkdirs());
+		File file = new File(
+		        "/D:/servers/mtssh/webapps/gt/WEB-INF/lib/gaara-1.0.1-SNAPSHOT.jar!/com/meituan/gaara/conf/");
+		System.out.println(file.isDirectory());
 	}
 }

@@ -17,33 +17,38 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.meituan.gaara.collector.Collector;
+import com.meituan.gaara.collector.DefaultInfoCollector;
+import com.meituan.gaara.info.TransientInfo;
 import com.meituan.gaara.util.Parameter;
 import com.meituan.gaara.util.ParameterUtil;
 import com.meituan.gaara.util.WebUtil;
 
 /**
- * 收集器工厂
+ * 本地收集器工厂
  * 
  * @author lichengwu
  * @created 2012-2-16
  * 
  * @version 1.1
  */
-public class SimpleLocalCollectorFactory {
+public class LocalCollectorFactory {
 
-	private static final Log log = LogFactory.getLog(SimpleLocalCollectorFactory.class);
+	private static final Log log = LogFactory.getLog(LocalCollectorFactory.class);
 
 	public Map<String, Collector> registeredCollectors = new ConcurrentHashMap<String, Collector>();
 
-	private final static SimpleLocalCollectorFactory INSTANCE = new SimpleLocalCollectorFactory();
+	private final static LocalCollectorFactory INSTANCE = new LocalCollectorFactory();
 
 	/**
 	 * 收集器所在的包
 	 */
 	private static final String COLLECTOR_PACKAGE = "com.meituan.gaara.collector.";
 
-	private SimpleLocalCollectorFactory() {
-		registerCollector();
+	private LocalCollectorFactory() {
+		//server模式不收集本地资源
+		if(!"server".equals(ParameterUtil.getParameter(Parameter.GAARA_RUN_MODE))){
+			registerCollector();
+		}
 	}
 
 	/**
@@ -82,7 +87,7 @@ public class SimpleLocalCollectorFactory {
 	public Collector addCollector(String collector) {
 		Collector c = null;
 		if (registeredCollectors.containsKey(collector)) {
-			log.warn("collector[" + collector + "] already exist, ignored...");
+			log.warn("local collector[" + collector + "] already exist, ignored...");
 			c = registeredCollectors.get(collector);
 		} else {
 			c = newCollectorByName(collector);
@@ -96,6 +101,9 @@ public class SimpleLocalCollectorFactory {
 					        Parameter.REGISTERED_LOCAL_COLLECTORS.getName(),
 					        exists + "," + c.getName());
 				}
+				log.info("register new local collector [" + collector + "]");
+			} else {
+				log.warn("can not register local collector [" + collector + "]");
 			}
 		}
 		return c;
@@ -112,12 +120,14 @@ public class SimpleLocalCollectorFactory {
 	 */
 	private Collector newCollectorByName(String name) {
 		assert name != null;
-		Collector collector = null;
+		DefaultInfoCollector collector = null;
 		try {
 			Class<?> clazz = Class.forName(COLLECTOR_PACKAGE + name);
 			Constructor<?> constructor = clazz.getConstructor(String.class);
-			collector = (Collector) constructor.newInstance(WebUtil.getContextPath(ParameterUtil
-			        .getServletContext()));
+			collector = (DefaultInfoCollector) constructor.newInstance(WebUtil
+			        .getContextPath(ParameterUtil.getServletContext()));
+			// 初始化
+			collector.init();
 		} catch (InstantiationException e) {
 			log.error("make sure " + COLLECTOR_PACKAGE + name + " is an instance", e);
 		} catch (IllegalAccessException e) {
@@ -130,9 +140,54 @@ public class SimpleLocalCollectorFactory {
 			log.error(e.getMessage(), e);
 		}
 		if (collector == null) {
-			log.error("can not create collector by name:" + name);
+			log.error("can not create local collector by name:" + name);
 		} else {
-			log.info("create new collector[" + name + "]");
+			log.info("create new local collector [" + name + "]");
+		}
+		return collector;
+	}
+
+	/**
+	 * 为远程信息提供收集器
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-17
+	 * 
+	 * @param name
+	 *            收集器名称
+	 * @param application
+	 *            应用名字
+	 * @param info
+	 *            收集器手收集的信息
+	 * @return DefaultInfoCollector
+	 */
+	public static DefaultInfoCollector newCollectorForRemote(String name, String application,
+	        TransientInfo info) {
+		assert name != null;
+		assert info != null;
+		assert application != null;
+		DefaultInfoCollector collector = null;
+		try {
+			Class<?> clazz = Class.forName(COLLECTOR_PACKAGE + name);
+			Constructor<?> constructor = clazz.getConstructor(String.class);
+			collector = (DefaultInfoCollector) constructor.newInstance(application);
+			// 初始化
+			collector.init(info);
+		} catch (InstantiationException e) {
+			log.error("make sure " + COLLECTOR_PACKAGE + name + " is an instance", e);
+		} catch (IllegalAccessException e) {
+			log.error("can not access " + COLLECTOR_PACKAGE + name, e);
+		} catch (ClassNotFoundException e) {
+			log.error("class not found:" + COLLECTOR_PACKAGE + name, e);
+		} catch (NoSuchMethodException e) {
+			log.error("can not found Constructor(String):" + COLLECTOR_PACKAGE + name, e);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		if (collector == null) {
+			log.error("can not create collector [" + name+"] for application : "+application);
+		} else {
+			log.info("create new collector[" + name + "] for application [" + application + "]");
 		}
 		return collector;
 	}
@@ -171,7 +226,7 @@ public class SimpleLocalCollectorFactory {
 	 * 
 	 * @return
 	 */
-	public static SimpleLocalCollectorFactory getInstance() {
+	public static LocalCollectorFactory getInstance() {
 		return INSTANCE;
 	}
 
@@ -191,7 +246,7 @@ public class SimpleLocalCollectorFactory {
 			Collector collector = registeredCollectors.remove(collectName);
 			if (collector != null) {
 				collector.destory();
-				//删除配置
+				// 删除配置
 				String exists = ParameterUtil.getParameter(Parameter.REGISTERED_LOCAL_COLLECTORS);
 				List<String> list = new ArrayList<String>(Arrays.asList(exists.split(",")));
 				list.remove(collector.getName());

@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -59,7 +59,7 @@ final public class ParameterUtil implements Serializable {
 			initLocalInfo();
 			loadCustomerSetting();
 			PID.getPID();
-			//记录系统启动时间
+			// 记录系统启动时间
 			setParameter(Parameter.APPLICATION_START_TIME, System.currentTimeMillis());
 		} catch (FileNotFoundException e) {
 			log.error(e.getMessage(), e);
@@ -73,8 +73,8 @@ final public class ParameterUtil implements Serializable {
 	 * 获得参数值
 	 * <p>
 	 * <b>读取参数顺序:</b><br />
-	 * 1.com/meituan/gaara/conf下所有properties文件。<br />
-	 * 2.读取{@link ServletContext#getInitParameter(String)}。<br />
+	 * 1.读取{@link ServletContext#getInitParameter(String)}。<br />
+	 * 2.com/meituan/gaara/conf下所有properties文件。<br />
 	 * 3.{@link System#getProperty(String)}。
 	 * 
 	 * @author lichengwu
@@ -110,8 +110,8 @@ final public class ParameterUtil implements Serializable {
 	 * 获得参数值
 	 * <p>
 	 * <b>读取参数顺序:</b><br />
-	 * 1.com/meituan/gaara/conf下所有properties文件。<br />
-	 * 2.读取{@link ServletContext#getInitParameter(String)}。<br />
+	 * 1.读取{@link ServletContext#getInitParameter(String)}。<br />
+	 * 2.com/meituan/gaara/conf下所有properties文件。<br />
 	 * 3.{@link System#getProperty(String)}。
 	 * 
 	 * @author lichengwu
@@ -123,17 +123,18 @@ final public class ParameterUtil implements Serializable {
 	 */
 	public static String getParameter(String name) {
 		assert name != null;
-		// 1.com/meituan/gaara/conf下所有properties文件读取
-		Object value = properties.get(name);
-		if (value != null) {
-			return value.toString();
-		}
-		// 2.如果 servletContext不为空，读取初始化参数
+		Object value = null;
+		// 1.如果 servletContext不为空，读取初始化参数
 		if (servletContext != null) {
 			value = servletContext.getInitParameter(name);
 			if (value != null) {
 				return value.toString();
 			}
+		}
+		// 2.com/meituan/gaara/conf下所有properties文件读取
+		value = properties.get(name);
+		if (value != null) {
+			return value.toString();
 		}
 		// 3.从系统读取
 		value = System.getProperty(name);
@@ -169,20 +170,28 @@ final public class ParameterUtil implements Serializable {
 	 * @throws IOException
 	 */
 	private static void readProperties() throws FileNotFoundException, IOException {
-		File file = new File(FileUtil.getConfigPath());
-		File[] configFiles = file.listFiles(new FilenameFilter() {
-			// 所有配置文件
-			public boolean accept(File dir, String name) {
-				return name.endsWith(".properties");
-			}
-		});
-		// 读取配置文件
-		if (configFiles != null && configFiles.length > 0) {
-			for (File configFile : configFiles) {
-				log.info("read properties from file:" + configFile.getCanonicalPath());
-				properties.load(new FileReader(configFile));
-			}
-		}
+		InputStream gaaraIn = ParameterUtil.class.getResourceAsStream(FileUtil.getConfigPath()
+		        + "gaara.properties");
+		InputStream jvmIn = ParameterUtil.class.getResourceAsStream(FileUtil.getConfigPath()
+		        + "jvm.properties");
+		properties.load(gaaraIn);
+		properties.load(jvmIn);
+		Closer.close(gaaraIn, jvmIn);
+		// File file = new File();
+		// File[] configFiles = file.listFiles(new FilenameFilter() {
+		// // 所有配置文件
+		// public boolean accept(File dir, String name) {
+		// return name.endsWith(".properties");
+		// }
+		// });
+		// // 读取配置文件
+		// if (configFiles != null && configFiles.length > 0) {
+		// for (File configFile : configFiles) {
+		// log.info("read properties from file:" +
+		// configFile.getCanonicalPath());
+		// properties.load(new FileReader(configFile));
+		// }
+		// }
 	}
 
 	/**
@@ -258,7 +267,8 @@ final public class ParameterUtil implements Serializable {
 		FileReader reader = null;
 		try {
 			// gaara文件存储路径
-			File storageDirectory = FileUtil.getStorageDirectory(WebUtil.getFullCurrentApplication());
+			File storageDirectory = FileUtil.getStorageDirectory(WebUtil
+			        .getContextPath(servletContext));
 			FileUtil.ensureFilePath(storageDirectory);
 			File file = new File(storageDirectory.getCanonicalPath() + File.separator
 			        + "application.properties");
@@ -295,7 +305,8 @@ final public class ParameterUtil implements Serializable {
 		FileWriter writer = null;
 		try {
 			// gaara文件存储路径
-			File storageDirectory = FileUtil.getStorageDirectory(WebUtil.getFullCurrentApplication());
+			File storageDirectory = FileUtil.getStorageDirectory(WebUtil
+			        .getContextPath(servletContext));
 			FileUtil.ensureFilePath(storageDirectory);
 			File file = new File(storageDirectory.getCanonicalPath() + File.separator
 			        + "application.properties");
@@ -303,10 +314,10 @@ final public class ParameterUtil implements Serializable {
 				file.createNewFile();
 			}
 			reader = new FileReader(file);
-			writer = new FileWriter(file);
 			Properties props = new Properties();
 			props.load(reader);
-			props.put(key, value);
+			props.setProperty(key, String.valueOf(value));
+			writer = new FileWriter(file);
 			props.store(writer, "");
 			// 同时保存到当前的设置中
 			properties.put(key, value);

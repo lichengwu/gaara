@@ -25,12 +25,12 @@ import com.meituan.gaara.test.BaseTest;
  * @version 1.0
  */
 public class SimpleLocalCollectorFactoryTest extends BaseTest{
-	SimpleLocalCollectorFactory instance;
+	LocalCollectorFactory instance;
 	
 	@Before
 	public void setUp() throws Exception{
 		super.setUp();
-		instance = SimpleLocalCollectorFactory.getInstance();
+		instance = LocalCollectorFactory.getInstance();
 	}
 	
 	

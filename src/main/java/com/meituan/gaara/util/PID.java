@@ -7,7 +7,6 @@ package com.meituan.gaara.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -82,17 +81,18 @@ public final class PID {
 		String osName = ParameterUtil.getParameter(Parameter.OS_NAME);
 		// 处理windows
 		if (osName.toLowerCase().contains("windows")) {
-			FileInputStream fis = null;
+			InputStream in = null;
 			FileOutputStream fos = null;
 
 			try {
 				// 创建临时getpids.exe文件
 				tempFile = File.createTempFile("getpids", ".exe");
-				File getpids = new File(FileUtil.getResourcePath("getpids.exe"));
-				fis = new FileInputStream(getpids);
+				in = PID.class.getResourceAsStream(FileUtil.getResourcePath("getpids.exe"));
+				//File getpids = new File();
+				//fis = new FileInputStream(getpids);
 				fos = new FileOutputStream(tempFile);
 				byte[] buf = new byte[1024];
-				while (fis.read(buf) != -1) {
+				while (in.read(buf) != -1) {
 					fos.write(buf);
 				}
 				// 获得临时getpids.exe文件路径作为命令
@@ -105,7 +105,7 @@ public final class PID {
 				if (tempFile != null) {
 					tempFile.deleteOnExit();
 				}
-				Closer.close(fis, fos);
+				Closer.close(in, fos);
 			}
 		}
 		// 处理非windows
