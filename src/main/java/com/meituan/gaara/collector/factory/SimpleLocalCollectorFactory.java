@@ -45,7 +45,10 @@ public class SimpleLocalCollectorFactory {
 	private static final String COLLECTOR_PACKAGE = "com.meituan.gaara.collector.";
 
 	private SimpleLocalCollectorFactory() {
-		registerCollector();
+		//server模式不收集本地资源
+		if(!"server".equals(ParameterUtil.getParameter(Parameter.GAARA_RUN_MODE))){
+			registerCollector();
+		}
 	}
 
 	/**
@@ -84,7 +87,7 @@ public class SimpleLocalCollectorFactory {
 	public Collector addCollector(String collector) {
 		Collector c = null;
 		if (registeredCollectors.containsKey(collector)) {
-			log.warn("collector[" + collector + "] already exist, ignored...");
+			log.warn("local collector[" + collector + "] already exist, ignored...");
 			c = registeredCollectors.get(collector);
 		} else {
 			c = newCollectorByName(collector);
@@ -98,6 +101,9 @@ public class SimpleLocalCollectorFactory {
 					        Parameter.REGISTERED_LOCAL_COLLECTORS.getName(),
 					        exists + "," + c.getName());
 				}
+				log.info("register new local collector [" + collector + "]");
+			} else {
+				log.warn("can not create local collector [" + collector + "]");
 			}
 		}
 		return c;
@@ -181,7 +187,7 @@ public class SimpleLocalCollectorFactory {
 		if (collector == null) {
 			log.error("can not create collector by name:" + name);
 		} else {
-			log.info("create new collector[" + name + "]");
+			log.info("create new collector[" + name + "] for [" + application + "]");
 		}
 		return collector;
 	}

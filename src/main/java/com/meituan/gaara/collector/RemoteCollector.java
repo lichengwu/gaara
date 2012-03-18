@@ -63,6 +63,7 @@ public class RemoteCollector {
 		assert url != null;
 		this.application = application;
 		this.url = url;
+		log.info("init remote collector [" + application + ":" + url.toString() + "]");
 	}
 
 	/**
@@ -81,6 +82,8 @@ public class RemoteCollector {
 			log.error("can not collect remote application[" + application + ":" + url.toString()
 			        + "]", e);
 		}
+		long begin = System.currentTimeMillis();
+		log.info("start collect remote application:" + application);
 		// 收集所有信息
 		for (Entry<String, TransientInfo> entry : call.entrySet()) {
 			String collectorName = entry.getKey();
@@ -93,6 +96,8 @@ public class RemoteCollector {
 			}
 			collector.saveInfo(info);
 		}
+		log.info("finish collect remote application:" + application + ", timeused:"
+		        + (System.currentTimeMillis() - begin) + "ms");
 	}
 
 	/**

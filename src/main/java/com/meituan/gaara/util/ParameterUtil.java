@@ -110,8 +110,8 @@ final public class ParameterUtil implements Serializable {
 	 * 获得参数值
 	 * <p>
 	 * <b>读取参数顺序:</b><br />
-	 * 1.com/meituan/gaara/conf下所有properties文件。<br />
-	 * 2.读取{@link ServletContext#getInitParameter(String)}。<br />
+	 * 1.读取{@link ServletContext#getInitParameter(String)}。<br />
+	 * 2.com/meituan/gaara/conf下所有properties文件。<br />
 	 * 3.{@link System#getProperty(String)}。
 	 * 
 	 * @author lichengwu
@@ -123,17 +123,18 @@ final public class ParameterUtil implements Serializable {
 	 */
 	public static String getParameter(String name) {
 		assert name != null;
-		// 1.com/meituan/gaara/conf下所有properties文件读取
-		Object value = properties.get(name);
-		if (value != null) {
-			return value.toString();
-		}
-		// 2.如果 servletContext不为空，读取初始化参数
+		Object value = null;
+		// 1.如果 servletContext不为空，读取初始化参数
 		if (servletContext != null) {
 			value = servletContext.getInitParameter(name);
 			if (value != null) {
 				return value.toString();
 			}
+		}
+		// 2.com/meituan/gaara/conf下所有properties文件读取
+		value = properties.get(name);
+		if (value != null) {
+			return value.toString();
 		}
 		// 3.从系统读取
 		value = System.getProperty(name);

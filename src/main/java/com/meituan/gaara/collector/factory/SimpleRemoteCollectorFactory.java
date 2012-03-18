@@ -38,7 +38,10 @@ public final class SimpleRemoteCollectorFactory {
 	private static SimpleRemoteCollectorFactory INSTANCE = new SimpleRemoteCollectorFactory();
 
 	private SimpleRemoteCollectorFactory() {
-		initRemoteCollector();
+		//cilent模式不收集远程信息
+		if("client".equals(ParameterUtil.getParameter(Parameter.GAARA_RUN_MODE))){
+			initRemoteCollector();
+		}
 	}
 
 	/**
@@ -66,6 +69,7 @@ public final class SimpleRemoteCollectorFactory {
 			log.info("this no remote collector...");
 			return;
 		}
+		log.info("start init remote collector...");
 		List<String> collectors = Arrays.asList(registeredName.split(";"));
 		for (String collector : collectors) {
 			String[] remoteInfo = collector.split(",");
@@ -77,6 +81,7 @@ public final class SimpleRemoteCollectorFactory {
 				        + "]", e);
 			}
 		}
+		log.info("finish init remote collector");
 	}
 
 	/**

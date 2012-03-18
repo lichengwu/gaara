@@ -31,9 +31,13 @@ public class CollectorServer {
 
 	private static final Log log = LogFactory.getLog(CollectorServer.class);
 
-	
+	/**
+	 * gaara运行模式
+	 */
+	private static final String RUN_MODE = ParameterUtil.getParameter(Parameter.GAARA_RUN_MODE);
+
 	private static CollectorServer INSTANCE = new CollectorServer();
-	
+
 	private Serializable recentInfo = null;
 
 	/**
@@ -83,36 +87,67 @@ public class CollectorServer {
 		// 收集时间间隔
 		long interval = ParameterUtil.getParameterAsInt(Parameter.COLLECT_RATE) * 1000L;
 		localTimer.schedule(new TimerTask() {
+
 			@Override
 			public void run() {
-				// 搜集本地
-				recentInfo = LocalCollectorController.getInstance().doCollect();
-				// 收集远程
-				Map<String, RemoteCollector> remoteCollectorMap = SimpleRemoteCollectorFactory.getInstance().getRegisteredRemoteCollectorMap();
-				if (!remoteCollectorMap.isEmpty()) {
-					for (Entry<String, RemoteCollector> entry : remoteCollectorMap.entrySet()) {
-						RemoteCollector remoteCollector = entry.getValue();
-						try {
-							remoteCollector.collectRemoteApplication();
-						} catch (GaaraException e) {
-							log.error(e.getMessage(), e);
-						}
-					}
+				if ("client".equals(RUN_MODE)) {
+					// 搜集本地
+					collectLocalApplication();
+				} else if ("server".equals(RUN_MODE)) {
+					// 收集远程
+					collectRemoteApllications();
+				} else {
+					// 混合模式
+					collectLocalApplication();
+					collectRemoteApllications();
 				}
 			}
 		}, 500, interval);
 		collecting = true;
 	}
-	
+
+	/**
+	 * 收集本地信息
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-18
+	 * 
+	 */
+	private void collectLocalApplication() {
+		recentInfo = LocalCollectorController.getInstance().doCollect();
+	}
+
+	/**
+	 * 收集远程服务器信息
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-18
+	 * 
+	 */
+	private void collectRemoteApllications() {
+		Map<String, RemoteCollector> remoteCollectorMap = SimpleRemoteCollectorFactory
+		        .getInstance().getRegisteredRemoteCollectorMap();
+		if (!remoteCollectorMap.isEmpty()) {
+			for (Entry<String, RemoteCollector> entry : remoteCollectorMap.entrySet()) {
+				RemoteCollector remoteCollector = entry.getValue();
+				try {
+					remoteCollector.collectRemoteApplication();
+				} catch (GaaraException e) {
+					log.error(e.getMessage(), e);
+				}
+			}
+		}
+	}
+
 	/**
 	 * 获得本地最新监控信息
 	 * 
 	 * @author lichengwu
 	 * @created 2012-3-17
-	 *
+	 * 
 	 * @return 本地最新监控信息
 	 */
-	public Serializable getLastestInfo(){
+	public Serializable getLastestInfo() {
 		return recentInfo;
 	}
 
