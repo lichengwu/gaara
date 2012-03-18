@@ -30,6 +30,6 @@ public class TimerTest {
 				System.out.println(System.currentTimeMillis());
 			}
 		}, 0,1000);
-		TimeUnit.SECONDS.sleep(100000000000000L);
+		TimeUnit.SECONDS.sleep(10);
 	}
 }

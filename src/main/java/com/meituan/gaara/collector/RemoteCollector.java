@@ -31,7 +31,7 @@ import com.meituan.gaara.store.HttpDataRetriever;
 public class RemoteCollector {
 
 	private static final Log log = LogFactory.getLog(RemoteCollector.class);
-	
+
 	private Map<String, DefaultInfoCollector> collectorHandler = new ConcurrentHashMap<String, DefaultInfoCollector>();
 
 	/**
@@ -64,37 +64,34 @@ public class RemoteCollector {
 		this.application = application;
 		this.url = url;
 	}
-
+	
 	/**
 	 * 收集远程应用的监控信息
 	 * 
 	 * @author lichengwu
 	 * @created 2012-3-10
 	 * 
-	 * @return
-	 * @throws GaaraException 
+	 * @throws GaaraException
 	 */
 	public void collectRemoteApplication() throws GaaraException {
 		Map<String, TransientInfo> call = null;
 		try {
-			call = new HttpDataRetriever(url).call();
+			call = new HttpDataRetriever(url).callPost();
 		} catch (IOException e) {
 			log.error("can not collect remote application[" + application + ":" + url.toString()
 			        + "]", e);
 		}
-		
-		for(Entry<String, TransientInfo> entry : call.entrySet()){
+		// 收集所有信息
+		for (Entry<String, TransientInfo> entry : call.entrySet()) {
 			String name = entry.getKey();
 			TransientInfo info = entry.getValue();
 			DefaultInfoCollector collector = collectorHandler.get(name);
-			if(collector==null){
+			if (collector == null) {
 				collector = SimpleLocalCollectorFactory.newCollectorForRemote(name, info);
 				collectorHandler.put(name, collector);
 			}
 			collector.saveInfo(info);
 		}
-		
-		//return call;
 	}
 
 	/**

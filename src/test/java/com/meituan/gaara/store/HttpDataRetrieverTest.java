@@ -23,7 +23,7 @@ public class HttpDataRetrieverTest {
 	@Test
 	public void test1() throws IOException{
 		URL url = new URL("http://www.meituan.com");
-		String call = new HttpDataRetriever(url).call();
+		String call = new HttpDataRetriever(url).callPost();
 		System.out.println(call);
 	}
 }
