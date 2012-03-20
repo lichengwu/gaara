@@ -6,6 +6,11 @@
 package com.meituan.gaara.util;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * 文件工具类
@@ -16,6 +21,8 @@ import java.io.File;
  * @version 1.0
  */
 final public class FileUtil {
+	
+	private static final Log log = LogFactory.getLog(FileUtil.class);
 
 	/**
 	 * 临时文件目录
@@ -135,6 +142,31 @@ final public class FileUtil {
 			fileName = fileName.substring(1);
 		}
 		return BASE_RESOURCES_PATH + fileName;
+	}
+	
+	/**
+	 * 已字符串的形式获得资源
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-20
+	 *
+	 * @param resource 资源的path
+	 * @return 资源的内容
+	 */
+	public static String getResourceAsString(String resource){
+		assert resource!=null;
+		String result=null;
+		InputStream in=null;
+		try {
+	        in = FileUtil.class.getResourceAsStream(getResourcePath(resource));
+	        result=IOUtil.readString(in);
+        } catch (IOException e) {
+        	log.error(e.getMessage(), e);
+        	return null;
+        }finally{
+        	Closer.close(in);
+        }
+		return result;
 	}
 
 	/**

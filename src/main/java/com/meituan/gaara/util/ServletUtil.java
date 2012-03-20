@@ -37,7 +37,7 @@ public final class ServletUtil {
 		response.addHeader("Pragma", "no-cache");
 		response.addHeader("Expires", "-1");
 	}
-
+	
 	/**
 	 * 向响应流中写入png图片
 	 * 
