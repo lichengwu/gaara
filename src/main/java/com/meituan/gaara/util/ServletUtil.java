@@ -5,10 +5,12 @@
  */
 package com.meituan.gaara.util;
 
+import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 
 import javax.servlet.http.HttpServletResponse;
@@ -83,5 +85,46 @@ public final class ServletUtil {
 		Closer.close(bout, oout);
 		out.write(byteArry);
 		out.flush();
+	}
+	
+	/**
+	 * 向流中写入字符串
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-20
+	 *
+	 * @param response HttpServletResponse
+	 * @param str 
+	 * @throws IOException
+	 */
+	public static void writeString(HttpServletResponse response,String str) throws IOException{
+		response.setContentType("text/html");
+		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(response.getOutputStream()));
+		writer.append(str);
+		writer.flush();
+	}
+	
+	/**
+	 * 将异常转化成html
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-20
+	 * 
+	 * @param throwable
+	 *            异常
+	 * @return html
+	 */
+	public static String exception2HTML(Throwable throwable) {
+		StringBuilder html = new StringBuilder();
+		int index = 0;
+		for (StackTraceElement ste : throwable.getStackTrace()) {
+			if (index == 0) {
+				html.append(ste.toString()+" : "+throwable.getLocalizedMessage()).append("<br />");
+			} else {
+				html.append("&nbsp;&nbsp;&nbsp;&nbsp;").append(ste.toString()).append("<br />");
+			}
+			index++;
+		}
+		return html.toString();
 	}
 }

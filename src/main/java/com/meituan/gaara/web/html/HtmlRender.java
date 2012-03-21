@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.meituan.gaara.util.FileUtil;
+import com.meituan.gaara.util.ServletUtil;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
@@ -113,34 +114,11 @@ final public class HtmlRender {
 			return writer.getBuffer().toString();
 		} catch (IOException e) {
 			log.error(e.getMessage(), e);
-			return exception2HTML(e);
+			return ServletUtil.exception2HTML(e);
 		} catch (TemplateException e) {
 			log.error(e.getMessage(), e);
-			return exception2HTML(e);
+			return ServletUtil.exception2HTML(e);
 		}
 	}
 
-	/**
-	 * 将异常转化成html
-	 * 
-	 * @author lichengwu
-	 * @created 2012-3-20
-	 * 
-	 * @param throwable
-	 *            异常
-	 * @return html
-	 */
-	private String exception2HTML(Throwable throwable) {
-		StringBuilder html = new StringBuilder();
-		int index = 0;
-		for (StackTraceElement ste : throwable.getStackTrace()) {
-			if (index == 0) {
-				html.append(ste.toString()).append("<br />");
-			} else {
-				html.append("&nbsp;&nbsp;").append(ste.toString()).append("<br />");
-			}
-			index++;
-		}
-		return html.toString();
-	}
 }
