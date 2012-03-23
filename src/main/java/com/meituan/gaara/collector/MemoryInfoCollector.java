@@ -40,24 +40,25 @@ public class MemoryInfoCollector extends DefaultInfoCollector {
 	 */
 	protected void initJRobin() throws GaaraException {
 		// 堆内存
-		jRobinMap.put("memory.used.heap", JRobin.createInstance(application, "memory.used"));
+		jRobinMap.put("memory.used.heap", JRobin.createInstance(application, "memory.used", null));
 		// 永久带内存
 		jRobinMap.put("memory.used.PermGen",
-		        JRobin.createInstance(application, "memory.used.PermGen"));
+		        JRobin.createInstance(application, "memory.used.PermGen", null));
 		// 老年代内存
 		jRobinMap.put("memory.used.heap.OldGen",
-		        JRobin.createInstance(application, "memory.used.heap.OldGen"));
+		        JRobin.createInstance(application, "memory.used.heap.OldGen", null));
 		// 新生代内存
-		jRobinMap.put("memory.used.Eden", JRobin.createInstance(application, "memory.used.Eden"));
+		jRobinMap.put("memory.used.Eden",
+		        JRobin.createInstance(application, "memory.used.Eden", null));
 		// 非堆内存
 		jRobinMap.put("memory.used.NonHeap",
-		        JRobin.createInstance(application, "memory.used.NonHeap"));
+		        JRobin.createInstance(application, "memory.used.NonHeap", null));
 		// 交换空间 TODO 是否支持物理内存和交换空间？
 		// jRobinMap.put("momory.used.SwapSpace",
 		// JRobin.createInstance(application, "momory.used.SwapSpace"));
 		// Survivor内存
 		jRobinMap.put("memory.used.Survivor",
-		        JRobin.createInstance(application, "memory.used.Survivor"));
+		        JRobin.createInstance(application, "memory.used.Survivor", null));
 	}
 
 	/**

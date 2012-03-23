@@ -34,6 +34,7 @@ import com.meituan.gaara.util.I18N;
 import com.meituan.gaara.util.Parameter;
 import com.meituan.gaara.util.ParameterUtil;
 import com.meituan.gaara.util.ReflectUtil;
+import com.meituan.gaara.util.StringUtil;
 import com.meituan.gaara.util.TimeRange;
 
 /**
@@ -62,6 +63,7 @@ public final class JRobin {
 	private String rrdFileName;
 	private int step;
 	private String label;
+	private String extra;
 
 	/**
 	 * 私有构造器
@@ -74,10 +76,12 @@ public final class JRobin {
 	 *            步长
 	 * @param label
 	 *            非必须，用于显示
+	 * @param extra
+	 *            标识信息(可选)
 	 * @throws RrdException
 	 * @throws IOException
 	 */
-	private JRobin(String application, File rrdFile, int step, String label)
+	private JRobin(String application, File rrdFile, int step, String label, String extra)
 	        throws RrdException, IOException {
 		assert application != null;
 		assert rrdFile != null;
@@ -87,6 +91,7 @@ public final class JRobin {
 		this.rrdFileName = rrdFile.getPath();
 		this.step = step;
 		this.label = label;
+		this.extra = extra;
 		// 初始化
 		init();
 	}
@@ -100,19 +105,24 @@ public final class JRobin {
 	 * @param application
 	 *            应用名字
 	 * @param label
-	 *            可选名字，用于显示
+	 *            标签，用于显示
+	 * @param extra
+	 *            特殊标记信息(可选)
+	 * 
 	 * @return
-	 * @throws GaaraException 
+	 * @throws GaaraException
 	 */
-	public static JRobin createInstance(String application, String label) throws GaaraException {
+	public static JRobin createInstance(String application, String label, String extra)
+	        throws GaaraException {
 		try {
-	        File rrdStorageDir = FileUtil.getStorageDirectory(application);
-	        File rrdFile = new File(rrdStorageDir, label + ".rrd");
-	        int step = ParameterUtil.getParameterAsInt(Parameter.COLLECT_RATE);
-	        return new JRobin(application, rrdFile, step, label);
-        } catch (Throwable e) {
-	        throw new GaaraException(e);
-        } 
+			File rrdStorageDir = FileUtil.getStorageDirectory(application);
+			File rrdFile = new File(rrdStorageDir, StringUtil.isBlank(extra) ? label + ".rrd"
+			        : extra + " " + label + ".rrd");
+			int step = ParameterUtil.getParameterAsInt(Parameter.COLLECT_RATE);
+			return new JRobin(application, rrdFile, step, label, extra);
+		} catch (Throwable e) {
+			throw new GaaraException(e);
+		}
 	}
 
 	/**
@@ -184,7 +194,7 @@ public final class JRobin {
 	 * @param height
 	 *            高度
 	 * @return 图片的二进制表示
-	 * @throws GaaraException 
+	 * @throws GaaraException
 	 */
 	public byte[] graph(TimeRange range, int width, int height) throws GaaraException {
 		try {
@@ -208,7 +218,7 @@ public final class JRobin {
 			throw new GaaraException(e);
 		} catch (IOException e) {
 			throw new GaaraException(e);
-        }
+		}
 	}
 
 	/**
@@ -290,7 +300,12 @@ public final class JRobin {
 	 * @return
 	 */
 	public String getLabel() {
-		return I18N.tryString(label);
+		String local_label = I18N.tryString(label);
+		if (StringUtil.isBlank(extra)) {
+			return local_label;
+		} else {
+			return extra + " " + local_label;
+		}
 	}
 
 	/**
@@ -375,7 +390,7 @@ public final class JRobin {
 	 * 
 	 * @author lichengwu
 	 * @created 2012-2-14
-	 *
+	 * 
 	 * @return 最后一次存储到数据库的值
 	 * @throws GaaraException
 	 */
@@ -394,14 +409,15 @@ public final class JRobin {
 		}
 
 	}
-	
+
 	/**
 	 * 写入数据
 	 * 
 	 * @author lichengwu
 	 * @created 2012-2-14
-	 *
-	 * @param value 数据
+	 * 
+	 * @param value
+	 *            数据
 	 * @throws GaaraException
 	 */
 	public void addValue(double value) throws GaaraException {
@@ -412,7 +428,7 @@ public final class JRobin {
 				try {
 					// create sample with the current timestamp
 					final Sample sample = rrdDb.createSample();
-					//如果最后更新时间大于当前时间，将会抛出异常：Bad sample timestamp
+					// 如果最后更新时间大于当前时间，将会抛出异常：Bad sample timestamp
 					if (sample.getTime() > rrdDb.getLastUpdateTime()) {
 						// set value for load datasource
 						sample.setValue(getDataSourceName(), value);
@@ -424,27 +440,26 @@ public final class JRobin {
 					rrdPool.release(rrdDb);
 				}
 			}
-		} catch (Throwable e){ 
+		} catch (Throwable e) {
 			if (e.getMessage() != null && e.getMessage().startsWith("Invalid file header")) {
-				//如果rrd文件损坏，重置文件
+				// 如果rrd文件损坏，重置文件
 				resetFile();
 				addValue(value);
 			}
 			throw new GaaraException(e);
 		}
-		
+
 	}
-	
-	
+
 	/**
 	 * 删除数据库
 	 * 
 	 * @author lichengwu
 	 * @created 2012-2-14
-	 *
+	 * 
 	 * @return 删除成功返回true，否则返回false
 	 */
-	public boolean delete(){
+	public boolean delete() {
 		return FileUtil.delete(rrdFileName);
 	}
 
@@ -467,9 +482,9 @@ public final class JRobin {
 		ReflectUtil.setFieldAccessible(field);
 		return (Timer) field.get(null);
 	}
-	
+
 	public static void main(String[] args) {
-	    System.out.println(JRobin.class.getCanonicalName());
-    }
+		System.out.println(JRobin.class.getCanonicalName());
+	}
 
 }

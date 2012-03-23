@@ -12,7 +12,6 @@ import com.meituan.gaara.info.GarbageCollector;
 import com.meituan.gaara.info.GarbageCollectorInfo;
 import com.meituan.gaara.info.TransientInfo;
 import com.meituan.gaara.store.JRobin;
-import com.meituan.gaara.util.I18N;
 import com.meituan.gaara.util.Parameter;
 import com.meituan.gaara.util.ParameterUtil;
 
@@ -52,15 +51,13 @@ public class GarbageCollectorInfoCollector extends DefaultInfoCollector {
 		for (GarbageCollector gc : describe) {
 			if (gc.isValid()) {
 				// 吞吐量数据
-				jRobinMap.put(
-				        gc.getName() + " gc_throughputs",
-				        JRobin.createInstance(application,
-				                gc.getName() + " " + I18N.getString("gc_throughputs")));
+				String label_throughpus = gc.getName() + " gc_throughputs";
+				jRobinMap.put(label_throughpus,
+				        JRobin.createInstance(application, "gc_throughputs", gc.getName()));
 				// 平均gc暂停时间数据
-				jRobinMap.put(
-				        gc.getName() + " gc_average_pause_time",
-				        JRobin.createInstance(application,
-				                gc.getName() + " " + I18N.getString("gc_average_pause_time")));
+				String label_pause_time = gc.getName() + " gc_average_pause_time";
+				jRobinMap.put(label_pause_time,
+				        JRobin.createInstance(application, "gc_average_pause_time",gc.getName()));
 			}
 		}
 	}
@@ -77,10 +74,12 @@ public class GarbageCollectorInfoCollector extends DefaultInfoCollector {
 		        - Long.valueOf(ParameterUtil.getParameter(Parameter.APPLICATION_START_TIME));
 		for (GarbageCollector gc : describe) {
 			// 吞吐量数据
-			jRobinMap.get(gc.getName() + " gc_throughputs").addValue(
+			String label_throughpus = gc.getName() + " gc_throughputs";
+			jRobinMap.get(label_throughpus).addValue(
 			        (applicationRuntime - gc.getCollectionTime()) * 100 / applicationRuntime);
 			// 平均gc暂停时间数据
-			jRobinMap.get(gc.getName() + " gc_average_pause_time").addValue(
+			String label_pause_time = gc.getName() + " gc_average_pause_time";
+			jRobinMap.get(label_pause_time).addValue(
 			        (gc.getCollectionTime() / Math.max(1, gc.getCollectionCount())));
 		}
 
