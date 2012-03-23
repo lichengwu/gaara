@@ -13,12 +13,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.meituan.gaara.collector.MemoryInfoCollector;
-import com.meituan.gaara.collector.factory.LocalCollectorFactory;
-import com.meituan.gaara.exception.GaaraException;
-import com.meituan.gaara.store.JRobin;
-import com.meituan.gaara.util.Period;
-
 /**
  * 画图测试
  * 
@@ -43,24 +37,27 @@ public class GraphServeltTest extends HttpServlet {
 
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	        throws ServletException, IOException {
-		String graphName = request.getParameter("name");
-		MemoryInfoCollector collector = (MemoryInfoCollector) LocalCollectorFactory
-		        .getInstance().getCollector(MemoryInfoCollector.class.getSimpleName());
-		JRobin jRobin = collector.getJRobin(graphName);
-		if (jRobin != null) {
-			byte[] img = new byte[0];
-			try {
-				img = jRobin.graph(Period.DAY.getRange(), 400, 200);
-			} catch (GaaraException e) {
-				e.printStackTrace();
-			}
-			response.setContentType("image/png");
-			response.setContentLength(img.length);
-			final String fileName = graphName + ".png";
-			response.addHeader("Content-Disposition", "inline;filename=" + fileName);
-			response.getOutputStream().write(img);
-			response.flushBuffer();
-		}
+//		String graphName = request.getParameter("name");
+//		MemoryInfoCollector collector = (MemoryInfoCollector) LocalCollectorFactory
+//		        .getInstance().getCollector(MemoryInfoCollector.class.getSimpleName());
+//		JRobin jRobin = collector.getJRobin(graphName);
+//		if (jRobin != null) {
+//			byte[] img = new byte[0];
+//			try {
+//				img = jRobin.graph(Period.DAY.getRange(), 400, 200);
+//			} catch (GaaraException e) {
+//				e.printStackTrace();
+//			}
+//			response.setContentType("image/png");
+//			response.setContentLength(img.length);
+//			final String fileName = graphName + ".png";
+//			response.addHeader("Content-Disposition", "inline;filename=" + fileName);
+//			response.getOutputStream().write(img);
+//			response.flushBuffer();
+//		}
+		
+		RequestHandler.handle(request, response);
+		
 
 	}
 

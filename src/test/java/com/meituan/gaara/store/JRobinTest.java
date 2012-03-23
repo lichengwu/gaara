@@ -32,7 +32,7 @@ public class JRobinTest extends BaseTest{
 
 	@Test
 	public void test() throws RrdException, IOException, GaaraException, InterruptedException{
-		JRobin robin = JRobin.createInstance("gaara", "memory.used");
+		JRobin robin = JRobin.createInstance("gaara", "memory.used",null);
 		long now = System.currentTimeMillis();
 		List<Object> list = new ArrayList<Object>();
 		for(int i=0;i<20;i++){

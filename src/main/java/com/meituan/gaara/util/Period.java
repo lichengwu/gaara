@@ -58,18 +58,16 @@ public enum Period {
 		this.range = TimeRange.createPeriodRange(this);
 	}
 
-	public static Period valueOfIgnoreCase(String period) {
-		return valueOf(period.toUpperCase(Locale.getDefault()).trim());
-	}
-
-	public static Period valueOfByMailCode(String mailPeriod) {
-		final String mailCode = mailPeriod.toLowerCase(Locale.getDefault()).trim();
-		for (final Period period : values()) {
-			if (period.mailCode.equals(mailCode)) {
-				return period;
+	public static Period valueOfIgnoreCase(String code) {
+		if(!StringUtil.isBlank(code)){
+			code = code.toLowerCase();
+			for(Period period : Period.values()){
+				if(period.getCode().equals(code)){
+					return period;
+				}
 			}
 		}
-		throw new IllegalArgumentException(mailPeriod);
+		return null;
 	}
 
 	public String getCode() {
@@ -81,11 +79,11 @@ public enum Period {
 	}
 
 	public String getLabel() {
-		return I18N.getString(code + "_label");
+		return I18N.tryString(code + "_label");
 	}
 
 	public String getLinkLabel() {
-		return I18N.getString(code + "_link_label");
+		return I18N.tryString(code + "_link_label");
 	}
 
 	public int getDurationDays() {

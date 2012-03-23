@@ -127,10 +127,10 @@ public class LocalCollectorController {
 		collecting = true;
 		long start = System.currentTimeMillis();
 		log.info("start to collect info...");
-		Map<String, Collector> registeredCollectorMap = LocalCollectorFactory.getInstance()
+		Map<String, DefaultInfoCollector> registeredCollectorMap = LocalCollectorFactory.getInstance()
 		        .getRegisteredLocalCollectorMap();
 		HashMap<String, Serializable> collectedInfo = new HashMap<String, Serializable>();
-		for (Entry<String, Collector> entry : registeredCollectorMap.entrySet()) {
+		for (Entry<String, DefaultInfoCollector> entry : registeredCollectorMap.entrySet()) {
 			Collector collector = entry.getValue();
 			collectedInfo.put(collector.getClass().getSimpleName(), collector.collect());
 		}

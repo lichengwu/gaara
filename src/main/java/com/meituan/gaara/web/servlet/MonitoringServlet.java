@@ -13,7 +13,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import com.meituan.gaara.collector.CollectorServer;
-import com.meituan.gaara.collector.factory.RemoteCollectorFactory;
 import com.meituan.gaara.util.I18N;
 import com.meituan.gaara.util.ParameterUtil;
 import com.meituan.gaara.util.ServletUtil;
@@ -57,8 +56,23 @@ public class MonitoringServlet extends HttpServlet {
 	public void doGet(HttpServletRequest request, HttpServletResponse response)
 	        throws ServletException, IOException {
 		I18N.bindLocale(request.getLocale());
-		RemoteCollectorFactory.getInstance().addRemoteCollector("gaara_test",
-		        "http://localhost:8088/gt/gaara");
+		
+		RequestHandler.handle(request, response);
+		
+//		RemoteCollectorFactory.getInstance().addRemoteCollector("gt", "http://localhost:8088/gt/");
+		
+//		request.setAttribute("test", "ssss");
+//		request.getRequestDispatcher("index.ftl").forward(request, response);
+//		InputStream in = null;
+//		try {
+//			in = FileUtil.class.getResourceAsStream(FileUtil.getResourcePath("resources/lang/language_zh.properties"));
+//			System.out.println(FileUtil.getResourcePath("resources/lang/language_zh.properties"));
+//			IOUtil.pump(in, response.getOutputStream());
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		} finally {
+//			Closer.close(in);
+//		}
 		I18N.unbindLocale();
 	}
 

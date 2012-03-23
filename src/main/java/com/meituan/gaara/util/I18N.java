@@ -113,12 +113,13 @@ final public class I18N {
 	 * 
 	 * @author lichengwu
 	 * @created 2012-3-3
-	 *
+	 * 
 	 * @param key
 	 * @return 获得本地化字符串，如果不存在，返回key
 	 */
 	public static String tryString(String key) {
-		String value = getResourceBundle().getString(key);
+		String value = null;
+		value = getResourceBundle().getString(key);
 		return value == null ? key : value;
 	}
 

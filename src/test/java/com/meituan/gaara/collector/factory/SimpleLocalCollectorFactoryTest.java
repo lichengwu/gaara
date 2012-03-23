@@ -13,6 +13,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.meituan.gaara.collector.Collector;
+import com.meituan.gaara.collector.DefaultInfoCollector;
 import com.meituan.gaara.collector.GarbageCollectorInfoCollector;
 import com.meituan.gaara.test.BaseTest;
 
@@ -36,8 +37,8 @@ public class SimpleLocalCollectorFactoryTest extends BaseTest{
 	
 	@Test
 	public void test(){
-		Map<String, Collector> map = instance.getRegisteredLocalCollectorMap();
-		for(Entry<String, Collector> entey : map.entrySet()){
+		Map<String, DefaultInfoCollector> map = instance.getRegisteredLocalCollectorMap();
+		for(Entry<String, DefaultInfoCollector> entey : map.entrySet()){
 			Serializable info = entey.getValue().collect();
 			System.out.println(info.toString());
 		}

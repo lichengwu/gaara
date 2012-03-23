@@ -125,7 +125,21 @@ public class RemoteCollector {
 	}
 	
 	/**
-	 * 消耗远程收集器
+	 * 获得远程应用对应在本地的收集器
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-22
+	 * 
+	 * @param collectorName
+	 *
+	 * @return 远程应用对应在本地的收集器 或者 null
+	 */
+	public DefaultInfoCollector getLocalCollector(String collectorName){
+		return collectorHandler.get(collectorName);
+	}
+	
+	/**
+	 * 销毁远程收集器
 	 * <p>
 	 * 递归消耗远程收集器的rrd信息，及注册信息。
 	 * </p>
