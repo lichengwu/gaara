@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -130,8 +131,10 @@ public class RequestHandler {
 				log.error(ex.getMessage(), ex);
 				ServletUtil.writeString(response, ServletUtil.exception2HTML(ex));
 			} else {
-				String html = HtmlRender.getInstance().render(TemplateFile.INDEX,
-				        new HashMap<String, Object>());
+				Map<String, Object> data = new HashMap<String, Object>();
+				data.put("app", "gt");
+				data.put("application", "gt@Oliver-ThinkPad");
+				String html = HtmlRender.getInstance().render(TemplateFile.APP_INDEX, data);
 				ServletUtil.writeString(response, html);
 			}
 		} catch (IOException e) {
@@ -157,7 +160,7 @@ public class RequestHandler {
 
 		// 图像名称
 		String graphName = request.getParameter(RequestParam.GRAPH_NAME.getName());
-		
+
 		String collecorName = request.getParameter(RequestParam.KEY.getName());
 
 		if (StringUtil.isBlank(graphName)) {
@@ -191,7 +194,8 @@ public class RequestHandler {
 			byte[] img = new byte[0];
 			// deal with time range
 			TimeRange tr = null;
-			Period period = Period.valueOfIgnoreCase(request.getParameter(RequestParam.PERIHOD.getName()));
+			Period period = Period.valueOfIgnoreCase(request.getParameter(RequestParam.PERIHOD
+			        .getName()));
 			if (period == null) {
 				try {
 					Date startDate = I18N.createDateFormat().parse(
@@ -200,7 +204,7 @@ public class RequestHandler {
 					        request.getParameter(RequestParam.END_DATE.getName()));
 					tr = TimeRange.createCustomRange(startDate, endDate);
 				} catch (Exception e) {
-					//log.warn(e.getMessage(), e);
+					// log.warn(e.getMessage(), e);
 				}
 			}
 			if (tr == null) {
