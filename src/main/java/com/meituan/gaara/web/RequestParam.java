@@ -21,9 +21,44 @@ public enum RequestParam {
 	TYPE("type"),
 
 	/**
-	 * 文件名
+	 * 资源名字
 	 */
-	FILE_NAME("fn");
+	KEY("key"),
+
+	/**
+	 * 宽度
+	 */
+	WIDTH("width"),
+
+	/**
+	 * 高度
+	 */
+	HEIGHT("height"),
+
+	/**
+	 * 应用名字
+	 */
+	APPLICATION("app"),
+
+	/**
+	 * 周期
+	 */
+	PERIHOD("period"),
+
+	/**
+	 * 开始日期
+	 */
+	START_DATE("start"),
+	
+	/**
+	 * 结束日期
+	 */
+	END_DATE("end"),
+	
+	/**
+	 * 图像名称
+	 */
+	GRAPH_NAME("gname");
 
 	private String name;
 

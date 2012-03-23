@@ -35,7 +35,7 @@ public class LocalCollectorFactory {
 
 	private static final Log log = LogFactory.getLog(LocalCollectorFactory.class);
 
-	public Map<String, Collector> registeredCollectors = new ConcurrentHashMap<String, Collector>();
+	public Map<String, DefaultInfoCollector> registeredCollectors = new ConcurrentHashMap<String, DefaultInfoCollector>();
 
 	private final static LocalCollectorFactory INSTANCE = new LocalCollectorFactory();
 
@@ -45,8 +45,8 @@ public class LocalCollectorFactory {
 	private static final String COLLECTOR_PACKAGE = "com.meituan.gaara.collector.";
 
 	private LocalCollectorFactory() {
-		//server模式不收集本地资源
-		if(!"server".equals(ParameterUtil.getParameter(Parameter.GAARA_RUN_MODE))){
+		// server模式不收集本地资源
+		if (!"server".equals(ParameterUtil.getParameter(Parameter.GAARA_RUN_MODE))) {
 			registerCollector();
 		}
 	}
@@ -68,7 +68,7 @@ public class LocalCollectorFactory {
 		}
 		List<String> collectors = Arrays.asList(registeredName.split(","));
 		for (String name : collectors) {
-			Collector collector = newCollectorByName(name);
+			DefaultInfoCollector collector = newCollectorByName(name);
 			if (collector != null) {
 				registeredCollectors.put(collector.getName(), collector);
 			}
@@ -84,8 +84,8 @@ public class LocalCollectorFactory {
 	 * @param collector名字
 	 * @return collector实例或者null(添加失败)
 	 */
-	public Collector addCollector(String collector) {
-		Collector c = null;
+	public DefaultInfoCollector addCollector(String collector) {
+		DefaultInfoCollector c = null;
 		if (registeredCollectors.containsKey(collector)) {
 			log.warn("local collector[" + collector + "] already exist, ignored...");
 			c = registeredCollectors.get(collector);
@@ -118,7 +118,7 @@ public class LocalCollectorFactory {
 	 * @param name
 	 * @return
 	 */
-	private Collector newCollectorByName(String name) {
+	private DefaultInfoCollector newCollectorByName(String name) {
 		assert name != null;
 		DefaultInfoCollector collector = null;
 		try {
@@ -185,7 +185,7 @@ public class LocalCollectorFactory {
 			log.error(e.getMessage(), e);
 		}
 		if (collector == null) {
-			log.error("can not create collector [" + name+"] for application : "+application);
+			log.error("can not create collector [" + name + "] for application : " + application);
 		} else {
 			log.info("create new collector[" + name + "] for application [" + application + "]");
 		}
@@ -200,7 +200,7 @@ public class LocalCollectorFactory {
 	 * 
 	 * @return 以类名为key，以collector为value的map
 	 */
-	public Map<String, Collector> getRegisteredLocalCollectorMap() {
+	public Map<String, DefaultInfoCollector> getRegisteredLocalCollectorMap() {
 		return Collections.unmodifiableMap(registeredCollectors);
 	}
 
@@ -214,7 +214,7 @@ public class LocalCollectorFactory {
 	 *            collector名字
 	 * @return collector实例或者null
 	 */
-	public Collector getCollector(String name) {
+	public DefaultInfoCollector getCollector(String name) {
 		return registeredCollectors.get(name);
 	}
 

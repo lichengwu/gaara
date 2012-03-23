@@ -19,10 +19,16 @@ public enum RequestType {
 	 * com.meituan.gaara.resources 下的资源
 	 */
 	RESOURCE("resource"),
+	
 	/**
 	 * JRobin图像
 	 */
-	GRAPH("graph");
+	GRAPH("graph"),
+
+	/**
+	 * 具体页面
+	 */
+	PAGE("page");
 
 	private String name;
 
@@ -33,11 +39,11 @@ public enum RequestType {
 	public String getName() {
 		return name;
 	}
-	
-	public static RequestType getRequestType(String name){
-		assert name!=null;
-		for(RequestType type : RequestType.values()){
-			if(type.getName().equals(name)){
+
+	public static RequestType getRequestType(String name) {
+		assert name != null;
+		for (RequestType type : RequestType.values()) {
+			if (type.getName().equals(name)) {
 				return type;
 			}
 		}

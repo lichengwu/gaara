@@ -311,8 +311,8 @@ public final class JRobin {
 		graphDef.datasource(average, rrdFileName, dataSourceName, "AVERAGE");
 		graphDef.datasource(max, rrdFileName, dataSourceName, "MAX");
 		graphDef.setMinValue(0);
-		final String averageLabel = I18N.getString("average_value");
-		final String maxLabel = I18N.getString("max_value");
+		final String averageLabel = I18N.tryString("average_value");
+		final String maxLabel = I18N.tryString("max_value");
 		graphDef.area(average, getPaint(height), averageLabel);
 		graphDef.line(max, Color.BLUE, maxLabel);
 		graphDef.gprint(average, "AVERAGE", averageLabel + ": %9.0f %S\\r");
@@ -467,5 +467,9 @@ public final class JRobin {
 		ReflectUtil.setFieldAccessible(field);
 		return (Timer) field.get(null);
 	}
+	
+	public static void main(String[] args) {
+	    System.out.println(JRobin.class.getCanonicalName());
+    }
 
 }

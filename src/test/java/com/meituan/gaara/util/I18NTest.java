@@ -6,8 +6,11 @@
 package com.meituan.gaara.util;
 
 
-import org.junit.Before;
+import java.text.ParseException;
+
 import org.junit.Test;
+
+import com.meituan.gaara.test.BaseTest;
 
 /**
  *
@@ -16,24 +19,18 @@ import org.junit.Test;
  *
  * @version 1.0
  */
-public class I18NTest {
+public class I18NTest extends BaseTest {
 
-	/**
-	 * 
-	 * @author lichengwu
-	 * @created 2012-2-14
-	 *
-	 * @throws java.lang.Exception
-	 */
-	@Before
-	public void setUp() throws Exception {
-		ParameterUtil.initialize(null);
-	}
-	
 	@Test
 	public void test(){
 //		//System.out.println(I18N.getCurrentDate());
 		System.out.println(I18N.getString("at"));
+	}
+	
+	@Test
+	public void testDateFormat() throws ParseException{
+//		System.out.println(I18N.getCurrentDate());
+		System.out.println(I18N.createDateFormat().parse("12-3-22"));
 	}
 
 }

@@ -181,4 +181,18 @@ public final class RemoteCollectorFactory {
 			collector = null;
 		}
 	}
+
+	/**
+	 * 根据应用名字获得{@link RemoteCollector}
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-22
+	 * 
+	 * @param application
+	 *            远程应用的名字
+	 * @return {@link RemoteCollector} 或者null
+	 */
+	public RemoteCollector getRemoteCollector(String application) {
+		return remoteCollectorMap.get(application);
+	}
 }
