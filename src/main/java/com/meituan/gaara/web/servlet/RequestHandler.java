@@ -27,6 +27,7 @@ import com.meituan.gaara.util.Closer;
 import com.meituan.gaara.util.FileUtil;
 import com.meituan.gaara.util.I18N;
 import com.meituan.gaara.util.IOUtil;
+import com.meituan.gaara.util.ImageCreator;
 import com.meituan.gaara.util.Period;
 import com.meituan.gaara.util.ServletUtil;
 import com.meituan.gaara.util.StringUtil;
@@ -168,6 +169,16 @@ public class RequestHandler {
 			return;
 		}
 
+		// deal with graph withd&height
+		int width = 200;
+		int height = 50;
+		try {
+			width = Integer.valueOf(request.getParameter(RequestParam.WIDTH.getName()));
+			height = Integer.valueOf(request.getParameter(RequestParam.HEIGHT.getName()));
+		} catch (NumberFormatException ex) {
+			// ignore
+		}
+
 		DefaultInfoCollector collector = null;
 		// 应用名字，如果没有，默认本地应用
 		String application = request.getParameter(RequestParam.APPLICATION.getName());
@@ -178,6 +189,10 @@ public class RequestHandler {
 			RemoteCollector remoteCollector = RemoteCollectorFactory.getInstance()
 			        .getRemoteCollector(application);
 			if (remoteCollector == null) {
+				response.setContentType("image/png");
+				response.addHeader("Content-Disposition", "inline;filename=err.jpg");
+				ImageCreator.create(width, height, I18N.tryString(graphName) + " Not Found",
+				        response.getOutputStream());
 				log.error("remote collector for application [" + application + "] missing...");
 				return;
 			}
@@ -185,7 +200,12 @@ public class RequestHandler {
 		}
 
 		if (collector == null) {
-			log.error("can note obtain collector for application [" + application + "]");
+			response.setContentType("image/png");
+			response.addHeader("Content-Disposition", "inline;filename=err.jpg");
+			ImageCreator.create(width, height, I18N.tryString(graphName) + " Unavailable",
+			        response.getOutputStream());
+			log.error("can note obtain collector [" + collecorName + "] for application ["
+			        + application + "]");
 			return;
 		}
 		// read grath from JRobin
@@ -204,26 +224,22 @@ public class RequestHandler {
 					        request.getParameter(RequestParam.END_DATE.getName()));
 					tr = TimeRange.createCustomRange(startDate, endDate);
 				} catch (Exception e) {
-					// log.warn(e.getMessage(), e);
+					// ignore
 				}
 			}
 			if (tr == null) {
 				tr = Period.DAY.getRange();
 			}
 
-			// deal with graph withd&height
-			int width = 200;
-			int height = 50;
-			try {
-				width = Integer.valueOf(request.getParameter(RequestParam.WIDTH.getName()));
-				height = Integer.valueOf(request.getParameter(RequestParam.HEIGHT.getName()));
-			} catch (NumberFormatException ex) {
-				// ignore
-			}
 			try {
 				img = jRobin.graph(tr, width, height);
 			} catch (GaaraException e) {
-				e.printStackTrace();
+				response.setContentType("image/png");
+				response.addHeader("Content-Disposition", "inline;filename=err.jpg");
+				ImageCreator
+				        .create(width, height, "Server Unavailable", response.getOutputStream());
+				log.error(e.getMessage(), e);
+				return;
 			}
 			response.setContentType("image/png");
 			response.setContentLength(img.length);
@@ -231,6 +247,11 @@ public class RequestHandler {
 			response.addHeader("Content-Disposition", "inline;filename=" + fileName);
 			response.getOutputStream().write(img);
 			response.flushBuffer();
+		} else {
+			response.setContentType("image/png");
+			response.addHeader("Content-Disposition", "inline;filename=err.jpg");
+			ImageCreator.create(width, height, I18N.tryString(graphName) + " Unavailable",
+			        response.getOutputStream());
 		}
 	}
 }

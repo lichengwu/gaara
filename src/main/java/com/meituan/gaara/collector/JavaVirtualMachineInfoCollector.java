@@ -48,8 +48,8 @@ public class JavaVirtualMachineInfoCollector extends DefaultInfoCollector {
 		}
 		if (jvmInfo.getIsOracleMBean()) {
 			// process cpu time
-			jRobinMap.put("jvm.processCpuTime",
-			        JRobin.createInstance(application, "jvm.processCpuTime", null));
+			jRobinMap.put("jvm.cpu",
+			        JRobin.createInstance(application, "jvm.cpu", null));
 		}
 		if (jvmInfo.getIsOracleMBeanOnUnix()) {
 			// open file descriptor count
@@ -72,7 +72,7 @@ public class JavaVirtualMachineInfoCollector extends DefaultInfoCollector {
 			jRobinMap.get("jvm.averageSystemLoad").addValue(jvmInfo.getAverageSystemLoad());
 		}
 		if (jvmInfo.getIsOracleMBean()) {
-			jRobinMap.get("jvm.processCpuTime").addValue(jvmInfo.getProcessCpuTime());
+			jRobinMap.get("jvm.cpu").addValue(jvmInfo.getCpuUsage());
 		}
 		if (jvmInfo.getIsOracleMBeanOnUnix()) {
 			jRobinMap.get("jvm.openFileDescriptorCount").addValue(

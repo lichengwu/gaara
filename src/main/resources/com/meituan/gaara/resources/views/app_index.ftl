@@ -15,7 +15,7 @@
 	<img src="?type=graph&app=${app!''}&key=GarbageCollectorInfoCollector&gname=PS%20Scavenge%20gc_average_pause_time">
 	<img src="?type=graph&app=${app!''}&key=GarbageCollectorInfoCollector&gname=PS%20Scavenge%20gc_throughputs"><br />
 	JVM Info:<br />
-	<img src="?type=graph&app=${app!''}&key=JavaVirtualMachineInfoCollector&gname=jvm.processCpuTime">
+	<img src="?type=graph&app=${app!''}&key=JavaVirtualMachineInfoCollector&gname=jvm.cpu">
 	<img src="?type=graph&app=${app!''}&key=JavaVirtualMachineInfoCollector&gname=jvm.averageSystemLoad">
 	<img src="?type=graph&app=${app!''}&key=JavaVirtualMachineInfoCollector&gname=jvm.openFileDescriptorCount">
 	<img src="?type=graph&app=${app!''}&key=JavaVirtualMachineInfoCollector&gname=jvm.threadCount">

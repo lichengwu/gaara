@@ -36,10 +36,13 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 
 	private static final long serialVersionUID = -9217176108573004487L;
 
+	private static final long PERIOD_IN_MILLISECONDS = ParameterUtil
+	        .getParameterAsInt(Parameter.COLLECT_RATE) * 1000L;
+
 	// stack traces of threads that are retrieved from java 1.6.0 update 1
 	// to avoid memory leak bug
 	// http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6434648
-	static final boolean STACK_TRACES_ENABLED = "1.6.0_01".compareTo(ParameterUtil
+	private static final boolean STACK_TRACES_ENABLED = "1.6.0_01".compareTo(ParameterUtil
 	        .getParameter(Parameter.JAVA_VERSION)) <= 0;
 
 	private static final boolean SYNCHRONIZER_ENABLED = "1.6".compareTo(ParameterUtil
@@ -75,6 +78,8 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 
 	private Boolean isAverageSystemLoadSupport = false;
 
+	private double cpuUsage = 0;
+
 	/**
 	 * 
 	 */
@@ -107,9 +112,9 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 		loadSystemProperties();
 		loadAverageSystemLoad();
 		loadOpenFileDescriptorCount();
-		loadProcessCpuTimeMillis();
 		loadMaxFileDescriptorCount();
 		loadAllThreadInfo();
+		loadCpuUsage();
 	}
 
 	/**
@@ -131,10 +136,10 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 	public boolean refresh() {
 		loadAverageSystemLoad();
 		loadOpenFileDescriptorCount();
-		loadProcessCpuTimeMillis();
 		loadMaxFileDescriptorCount();
 		loadAllThreadInfo();
 		lastUpdate = System.currentTimeMillis();
+		loadCpuUsage();
 		return true;
 	}
 
@@ -175,22 +180,44 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 	}
 
 	/**
-	 * load ProcessCpuTime
+	 * load cpu usage
 	 * 
 	 * @author lichengwu
-	 * @created 2012-3-23
+	 * @created 2012-3-25
 	 * 
-	 * @return
 	 */
-	@SuppressWarnings("restriction")
-	private void loadProcessCpuTimeMillis() {
+	private void loadCpuUsage() {
 		OperatingSystemMXBean operatingSystem = ManagementFactory.getOperatingSystemMXBean();
 		if (isOracleMBean) {
+			@SuppressWarnings("restriction")
 			final com.sun.management.OperatingSystemMXBean osBean = (com.sun.management.OperatingSystemMXBean) operatingSystem;
-			// 将纳秒转换成毫秒
-			processCpuTime = osBean.getProcessCpuTime() / 1000000;
+			@SuppressWarnings("restriction")
+			long newProcessCpuTime = osBean.getProcessCpuTime() / 1000000;
+			this.cpuUsage = Math.min((100*(newProcessCpuTime - this.processCpuTime)
+			        / PERIOD_IN_MILLISECONDS / Runtime.getRuntime().availableProcessors()), 100);
+			this.processCpuTime = newProcessCpuTime;
 		}
 	}
+
+	// /**
+	// * load ProcessCpuTime
+	// *
+	// * @author lichengwu
+	// * @created 2012-3-23
+	// *
+	// * @return
+	// */
+	// @SuppressWarnings("restriction")
+	// private void loadProcessCpuTimeMillis() {
+	// OperatingSystemMXBean operatingSystem =
+	// ManagementFactory.getOperatingSystemMXBean();
+	// if (isOracleMBean) {
+	// final com.sun.management.OperatingSystemMXBean osBean =
+	// (com.sun.management.OperatingSystemMXBean) operatingSystem;
+	// // 将纳秒转换成毫秒
+	// processCpuTime = osBean.getProcessCpuTime() / 1000000;
+	// }
+	// }
 
 	/**
 	 * load the maximum number of file descriptors.
@@ -526,6 +553,19 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 		return isOracleMBeanOnUnix;
 	}
 
+	/**
+	 * get CPU usage
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-25
+	 * 
+	 * @param CPU
+	 *            usage
+	 */
+	public double getCpuUsage() {
+		return cpuUsage;
+	}
+
 	// 下面两个方法用于“冷藏”和“解冻”
 	private void writeObject(ObjectOutputStream out) throws IOException {
 		out.writeObject(jvmArguments);
@@ -543,6 +583,7 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 		out.writeBoolean(isOracleMBean);
 		out.writeBoolean(isOracleMBeanOnUnix);
 		out.writeBoolean(isAverageSystemLoadSupport);
+		out.writeDouble(cpuUsage);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -562,5 +603,6 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 		isOracleMBean = in.readBoolean();
 		isOracleMBeanOnUnix = in.readBoolean();
 		isAverageSystemLoadSupport = in.readBoolean();
+		cpuUsage = in.readDouble();
 	}
 }
