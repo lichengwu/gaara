@@ -129,6 +129,7 @@ public abstract class DefaultInfoCollector implements Collector {
 	 */
 	@Override
 	public Serializable collect() {
+		info = getNewInfo();
 		if (client) {
 			log.info("client mode does not store monitoring information");
 		} else {
