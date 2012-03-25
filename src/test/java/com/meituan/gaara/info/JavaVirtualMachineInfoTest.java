@@ -29,10 +29,14 @@ public class JavaVirtualMachineInfoTest extends BaseTest{
 	 */
 	@Test
 	public void test() {
-		 List<ThreadDetails> threadInfoList = JavaVirtualMachineInfo.getInstance().getThreadInfoList();
+		 JavaVirtualMachineInfo jvm = JavaVirtualMachineInfo.getInstance();
+		List<ThreadDetails> threadInfoList = jvm.getThreadInfoList();
 		for(ThreadDetails detail : threadInfoList){
 			System.out.println(detail);
 		}
+		System.out.println(jvm.getSystemPorpterties());
+		System.out.println(jvm.getPID());
+		
 	}
 
 }

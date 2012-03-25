@@ -14,9 +14,13 @@ import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Properties;
 
+import com.meituan.gaara.util.PID;
 import com.meituan.gaara.util.Parameter;
 import com.meituan.gaara.util.ParameterUtil;
 
@@ -55,6 +59,22 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 
 	private List<ThreadDetails> threadInfoList = null;
 
+	private Map<String, String> systemPorpterties = null;
+
+	private String pid = PID.getPID();
+
+	private long threadCount;
+
+	private long totalStartedThreadCount;
+
+	private long peakThreadCount;
+
+	private Boolean isOracleMBean = false;
+
+	private Boolean isOracleMBeanOnUnix = false;
+
+	private Boolean isAverageSystemLoadSupport = false;
+
 	/**
 	 * 
 	 */
@@ -64,6 +84,14 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 	 * 构造方法
 	 */
 	private JavaVirtualMachineInfo() {
+		OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
+		String className = operatingSystemMXBean.getClass().getName();
+		// com.sun.management.UnixOperatingSystem extends
+		// com.sun.management.OperatingSystem
+		isOracleMBean = "com.sun.management.OperatingSystem".equals(className)
+		        || "com.sun.management.UnixOperatingSystem".equals(className);
+		isOracleMBeanOnUnix = "com.sun.management.UnixOperatingSystem".equals(className);
+		isAverageSystemLoadSupport = operatingSystemMXBean.getSystemLoadAverage() >= 0;
 		init();
 	}
 
@@ -76,6 +104,7 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 	 */
 	private void init() {
 		loadJvmArguments();
+		loadSystemProperties();
 		loadAverageSystemLoad();
 		loadOpenFileDescriptorCount();
 		loadProcessCpuTimeMillis();
@@ -106,7 +135,7 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 		loadMaxFileDescriptorCount();
 		loadAllThreadInfo();
 		lastUpdate = System.currentTimeMillis();
-		return false;
+		return true;
 	}
 
 	/**
@@ -131,6 +160,21 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 	}
 
 	/**
+	 * load system properties
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-24
+	 * 
+	 */
+	private void loadSystemProperties() {
+		Properties properties = System.getProperties();
+		systemPorpterties = new HashMap<String, String>();
+		for (Entry<Object, Object> entry : properties.entrySet()) {
+			systemPorpterties.put(entry.getKey().toString(), entry.getValue().toString());
+		}
+	}
+
+	/**
 	 * load ProcessCpuTime
 	 * 
 	 * @author lichengwu
@@ -141,7 +185,7 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 	@SuppressWarnings("restriction")
 	private void loadProcessCpuTimeMillis() {
 		OperatingSystemMXBean operatingSystem = ManagementFactory.getOperatingSystemMXBean();
-		if (isOracleMBean(operatingSystem)) {
+		if (isOracleMBean) {
 			final com.sun.management.OperatingSystemMXBean osBean = (com.sun.management.OperatingSystemMXBean) operatingSystem;
 			// 将纳秒转换成毫秒
 			processCpuTime = osBean.getProcessCpuTime() / 1000000;
@@ -158,7 +202,7 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 	@SuppressWarnings("restriction")
 	private void loadMaxFileDescriptorCount() {
 		final OperatingSystemMXBean operatingSystem = ManagementFactory.getOperatingSystemMXBean();
-		if (isOracleMBeanOnUnix(operatingSystem)) {
+		if (isOracleMBeanOnUnix) {
 			final com.sun.management.UnixOperatingSystemMXBean unixOsBean = (com.sun.management.UnixOperatingSystemMXBean) operatingSystem;
 			try {
 				maxFileDescriptorCount = unixOsBean.getMaxFileDescriptorCount();
@@ -178,7 +222,7 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 	@SuppressWarnings("restriction")
 	private void loadOpenFileDescriptorCount() {
 		final OperatingSystemMXBean operatingSystem = ManagementFactory.getOperatingSystemMXBean();
-		if (isOracleMBeanOnUnix(operatingSystem)) {
+		if (isOracleMBeanOnUnix) {
 			com.sun.management.UnixOperatingSystemMXBean unixOsBean = (com.sun.management.UnixOperatingSystemMXBean) operatingSystem;
 			try {
 				openFileDescriptorCount = unixOsBean.getOpenFileDescriptorCount();
@@ -209,6 +253,13 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 	 */
 	private void loadAllThreadInfo() {
 		ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
+		// set peakThreadCount
+		peakThreadCount = threadBean.getPeakThreadCount();
+		// set threadCount
+		threadCount = threadBean.getThreadCount();
+		// set totalStartedThreadCount
+		totalStartedThreadCount = threadBean.getTotalStartedThreadCount();
+
 		List<Thread> threads;
 		Map<Thread, StackTraceElement[]> stackTraces;
 
@@ -247,26 +298,6 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 			threadInfoList.add(new ThreadDetails(thread, stackTraceElementList, cpuTimeMillis,
 			        userTimeMillis, deadlocked, hostAddress));
 		}
-	}
-
-	/**
-	 * 测试{@link OperatingSystemMXBean}是否是
-	 * {@link com.sun.management.OperatingSystem}或者
-	 * {@link com.sun.management.UnixOperatingSystem} 的实例
-	 * 
-	 * @author lichengwu
-	 * @created 2012-3-23
-	 * 
-	 * @param operatingSystem
-	 *            OperatingSystemMXBean
-	 * @return
-	 */
-	private boolean isOracleMBean(OperatingSystemMXBean operatingSystem) {
-		String className = operatingSystem.getClass().getName();
-		// com.sun.management.UnixOperatingSystem extends
-		// com.sun.management.OperatingSystem
-		return "com.sun.management.OperatingSystem".equals(className)
-		        || "com.sun.management.UnixOperatingSystem".equals(className);
 	}
 
 	/**
@@ -315,24 +346,6 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 		final Thread[] threadsArray = new Thread[group.activeCount()];
 		group.enumerate(threadsArray, true);
 		return Arrays.asList(threadsArray);
-	}
-
-	/**
-	 * 测试{@link OperatingSystemMXBean}是否是
-	 * {@link com.sun.management.UnixOperatingSystem} 的实例
-	 * 
-	 * @author lichengwu
-	 * @created 2012-3-23
-	 * 
-	 * @param operatingSystem
-	 *            OperatingSystemMXBean
-	 * @return
-	 */
-	private static boolean isOracleMBeanOnUnix(OperatingSystemMXBean operatingSystem) {
-		String className = operatingSystem.getClass().getName();
-		// com.sun.management.UnixOperatingSystem extends
-		// com.sun.management.OperatingSystem
-		return "com.sun.management.UnixOperatingSystem".equals(className);
 	}
 
 	/**
@@ -421,21 +434,133 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 	 * 
 	 * @author lichengwu
 	 * @created 2012-3-24
-	 *
+	 * 
 	 * @return all thread details
 	 */
 	public List<ThreadDetails> getThreadInfoList() {
 		return threadInfoList;
 	}
 
+	/**
+	 * @return the systemPorpterties
+	 */
+	public Map<String, String> getSystemPorpterties() {
+		return systemPorpterties;
+	}
+
+	/**
+	 * get the pid of JVM
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-24
+	 * 
+	 * @return the pid of JVM
+	 */
+	public String getPID() {
+		return pid;
+	}
+
+	/**
+	 * get the total number of threads created and also started since the Java
+	 * virtual machine started.
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-24
+	 * 
+	 * @return the total number of threads created and also started since the
+	 *         Java virtual machine started
+	 */
+	public long getTotalStartedThreadCount() {
+		return totalStartedThreadCount;
+	}
+
+	/**
+	 * get the current number of live threads including both daemon and
+	 * non-daemon threads.
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-24
+	 * 
+	 * @return the current number of live threads
+	 */
+	public long getThreadCount() {
+		return threadCount;
+	}
+
+	/**
+	 * test if average system load support
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-25
+	 * 
+	 * @return
+	 */
+	public Boolean getIsAverageSystemLoadSupport() {
+		return isAverageSystemLoadSupport;
+	}
+
+	/**
+	 * get the peak live thread count since the Java virtual machine started or
+	 * peak was reset
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-24
+	 * 
+	 * @return the peak live thread count
+	 */
+	public long getPeakThreadCount() {
+		return peakThreadCount;
+	}
+
+	/**
+	 * @return the isOracleMBean
+	 */
+	public Boolean getIsOracleMBean() {
+		return isOracleMBean;
+	}
+
+	/**
+	 * @return the isOracleMBeanOnUnix
+	 */
+	public Boolean getIsOracleMBeanOnUnix() {
+		return isOracleMBeanOnUnix;
+	}
+
 	// 下面两个方法用于“冷藏”和“解冻”
-
 	private void writeObject(ObjectOutputStream out) throws IOException {
-		// TODO
+		out.writeObject(jvmArguments);
+		out.writeLong(lastUpdate);
+		out.writeDouble(averageSystemLoad);
+		out.writeLong(processCpuTime);
+		out.writeLong(openFileDescriptorCount);
+		out.writeLong(maxFileDescriptorCount);
+		out.writeObject(threadInfoList);
+		out.writeObject(systemPorpterties);
+		out.writeUTF(pid);
+		out.writeLong(threadCount);
+		out.writeLong(totalStartedThreadCount);
+		out.writeLong(peakThreadCount);
+		out.writeBoolean(isOracleMBean);
+		out.writeBoolean(isOracleMBeanOnUnix);
+		out.writeBoolean(isAverageSystemLoadSupport);
 	}
 
+	@SuppressWarnings("unchecked")
 	private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
-		// TODO
+		jvmArguments = (List<String>) in.readObject();
+		lastUpdate = in.readLong();
+		averageSystemLoad = in.readDouble();
+		processCpuTime = in.readLong();
+		openFileDescriptorCount = in.readLong();
+		maxFileDescriptorCount = in.readLong();
+		threadInfoList = (List<ThreadDetails>) in.readObject();
+		systemPorpterties = (Map<String, String>) in.readObject();
+		pid = in.readUTF();
+		threadCount = in.readLong();
+		totalStartedThreadCount = in.readLong();
+		peakThreadCount = in.readLong();
+		isOracleMBean = in.readBoolean();
+		isOracleMBeanOnUnix = in.readBoolean();
+		isAverageSystemLoadSupport = in.readBoolean();
 	}
-
 }
