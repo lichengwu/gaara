@@ -159,6 +159,21 @@ final public class ParameterUtil implements Serializable {
 	public static int getParameterAsInt(String name) {
 		return Integer.valueOf(getParameter(name));
 	}
+	
+	/**
+	 * get parameter as long
+	 * <p>
+	 * REFERENCE:{@link ParameterUtil#getParameter(Parameter)}。·
+	 * 
+	 * @author lichengwu
+	 * @created 2012-1-22
+	 * 
+	 * @param parameter
+	 * @return long value
+	 */
+	public static long getParameterAsLong(String parameter) {
+		return Long.valueOf(getParameter(parameter));
+	}
 
 	/**
 	 * 读取配置文件

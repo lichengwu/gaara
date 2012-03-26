@@ -51,7 +51,7 @@ public class CollectorServer {
 	private Timer localTimer;
 
 	private CollectorServer() {
-		localTimer = new Timer("local_collector", true);
+		localTimer = new Timer("collector_server", true);
 	}
 
 	/**

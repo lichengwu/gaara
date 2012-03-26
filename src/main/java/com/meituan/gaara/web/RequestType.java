@@ -28,7 +28,12 @@ public enum RequestType {
 	/**
 	 * 具体页面
 	 */
-	PAGE("page");
+	PAGE("page"),
+	
+	/**
+	 * 数据同步
+	 */
+	SYNC("sync");
 
 	private String name;
 
