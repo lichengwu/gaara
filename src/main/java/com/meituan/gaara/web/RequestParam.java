@@ -58,7 +58,12 @@ public enum RequestParam {
 	/**
 	 * 图像名称
 	 */
-	GRAPH_NAME("gname");
+	GRAPH_NAME("gname"),
+	
+	/**
+	 * 时间
+	 */
+	TIME("time");
 
 	private String name;
 

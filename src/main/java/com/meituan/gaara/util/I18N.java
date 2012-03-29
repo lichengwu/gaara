@@ -297,7 +297,7 @@ final public class I18N {
 	}
 
 	/**
-	 * TODO 证明 时间间隔格式化
+	 * 时间间隔格式化
 	 * 
 	 * @author lichengwu
 	 * @created 2012-1-31

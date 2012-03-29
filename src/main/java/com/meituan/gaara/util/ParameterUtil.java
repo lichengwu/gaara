@@ -1,14 +1,22 @@
 package com.meituan.gaara.util;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import javax.servlet.ServletContext;
@@ -36,6 +44,8 @@ final public class ParameterUtil implements Serializable {
 
 	private static ServletContext servletContext = null;
 
+	private static HashMap<String, HashMap<String, Object>> applicationSettings = null;
+
 	/**
 	 * 私有构造方法
 	 */
@@ -59,6 +69,7 @@ final public class ParameterUtil implements Serializable {
 			initLocalInfo();
 			loadCustomerSetting();
 			PID.getPID();
+			readApplicationSettings();
 			// 记录系统启动时间
 			setParameter(Parameter.APPLICATION_START_TIME, System.currentTimeMillis());
 		} catch (FileNotFoundException e) {
@@ -159,7 +170,7 @@ final public class ParameterUtil implements Serializable {
 	public static int getParameterAsInt(String name) {
 		return Integer.valueOf(getParameter(name));
 	}
-	
+
 	/**
 	 * get parameter as long
 	 * <p>
@@ -272,6 +283,132 @@ final public class ParameterUtil implements Serializable {
 	}
 
 	/**
+	 * read application settings from file
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-27
+	 * 
+	 */
+	@SuppressWarnings("unchecked")
+	private static void readApplicationSettings() {
+		ObjectInputStream in = null;
+		try {
+			applicationSettings = new HashMap<String, HashMap<String, Object>>();
+			// gaara文件存储路径
+			File storageDirectory = FileUtil.getStorageDirectory(WebUtil
+			        .getContextPath(servletContext));
+			FileUtil.ensureFilePath(storageDirectory);
+			File file = new File(storageDirectory.getCanonicalPath() + File.separator + "app.conf");
+			if (!file.exists()) {
+				file.createNewFile();
+			} else {
+				in = new ObjectInputStream(new FileInputStream(file));
+				applicationSettings = (HashMap<String, HashMap<String, Object>>) in.readObject();
+			}
+		} catch (IOException e) {
+			log.warn(e.getMessage());
+		} catch (ClassNotFoundException e) {
+			log.error(e.getMessage(), e);
+		} finally {
+			Closer.close(in);
+		}
+	}
+
+	/**
+	 * 获得应用的设置参数
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-27
+	 * 
+	 * @param app
+	 * @param key
+	 * @return
+	 */
+	public static Object getApplicationProperty(String app, String key) {
+		for (Entry<String, HashMap<String, Object>> entry : applicationSettings.entrySet()) {
+			if (entry.getKey().equals(app)) {
+				return entry.getValue().get(key);
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * 储存应用设置
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-27
+	 * 
+	 * @param app
+	 * @param key
+	 * @param value
+	 */
+	public static void stortApplicationSettings(String app, String key, Object value) {
+		HashMap<String, Object> application = applicationSettings.get(app);
+		if (application == null) {
+			application = new HashMap<String, Object>();
+			applicationSettings.put(app, application);
+		}
+		application.put(key, value);
+		ObjectOutputStream out = null;
+		try {
+			File storageDirectory = FileUtil.getStorageDirectory(WebUtil
+			        .getContextPath(servletContext));
+			FileUtil.ensureFilePath(storageDirectory);
+			File file = new File(storageDirectory.getCanonicalPath() + File.separator + "app.conf");
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			out = new ObjectOutputStream(new FileOutputStream(file));
+			out.writeObject(applicationSettings);
+		} catch (FileNotFoundException e) {
+			log.error(e.getMessage(), e);
+		} catch (IOException e) {
+			log.error(e.getMessage(), e);
+		} finally {
+			Closer.close(out);
+		}
+	}
+
+	/**
+	 * sotre application settings to disk
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-27
+	 *
+	 * @param app
+	 * @param settings
+	 */
+	public static void stortApplicationSettings(String app, Map<String, Object> settings) {
+		HashMap<String, Object> application = applicationSettings.get(app);
+		if (application == null) {
+			application = new HashMap<String, Object>(settings);
+			applicationSettings.put(app, application);
+		} else {
+			application.putAll(settings);
+		}
+
+		ObjectOutputStream out = null;
+		try {
+			File storageDirectory = FileUtil.getStorageDirectory(WebUtil
+			        .getContextPath(servletContext));
+			FileUtil.ensureFilePath(storageDirectory);
+			File file = new File(storageDirectory.getCanonicalPath() + File.separator + "app.conf");
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			out = new ObjectOutputStream(new FileOutputStream(file));
+			out.writeObject(applicationSettings);
+		} catch (FileNotFoundException e) {
+			log.error(e.getMessage(), e);
+		} catch (IOException e) {
+			log.error(e.getMessage(), e);
+		} finally {
+			Closer.close(out);
+		}
+	}
+
+	/**
 	 * 获得用户配置信息
 	 * 
 	 * @author lichengwu
@@ -341,6 +478,20 @@ final public class ParameterUtil implements Serializable {
 		} finally {
 			Closer.close(reader, writer);
 		}
+	}
+
+	/**
+	 * get all remote application settings
+	 * 
+	 * @author lichengwu
+	 * @created 2012-3-27
+	 * 
+	 * @return
+	 */
+	public static Map<String, HashMap<String, Object>> getApplicationSettings() {
+		Map<String, HashMap<String, Object>> unmodifiableMap = Collections
+		        .unmodifiableMap(applicationSettings);
+		return unmodifiableMap;
 	}
 
 	/**

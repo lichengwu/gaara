@@ -18,9 +18,16 @@ import com.meituan.gaara.test.BaseTest;
  * @version 1.0
  */
 public class ParameterUtilTest extends BaseTest{
-	@Test
+//	@Test
 	public void test(){
 		ParameterUtil.storeCustomerProperties("key.sss", "value");
 		System.out.println(ParameterUtil.getParameter("key.sss"));
+	}
+	
+	@Test
+	public void testApplication(){
+		System.out.println(ParameterUtil.getApplicationSettings());
+		ParameterUtil.stortApplicationSettings("ct", "a", "b");
+		ParameterUtil.stortApplicationSettings("ct", "b", "a");
 	}
 }

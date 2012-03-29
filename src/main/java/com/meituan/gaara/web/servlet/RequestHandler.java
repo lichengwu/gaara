@@ -127,17 +127,16 @@ public class RequestHandler {
 	private static void handlePage(HttpServletRequest request, HttpServletResponse response) {
 		try {
 			String template = request.getParameter(RequestParam.KEY.getName());
-			if (template == null || "".equals(template.trim())) {
-				GaaraException ex = new GaaraException("template name not assigned");
-				log.error(ex.getMessage(), ex);
-				ServletUtil.writeString(response, ServletUtil.exception2HTML(ex));
-			} else {
-				Map<String, Object> data = new HashMap<String, Object>();
-				data.put("app", "gt");
-				data.put("application", "gt@Oliver-ThinkPad");
-				String html = HtmlRender.getInstance().render(TemplateFile.APP_INDEX, data);
-				ServletUtil.writeString(response, html);
+			TemplateFile templateFile = TemplateFile.getTemplateFile(template + ".ftl");
+			if (templateFile == null) {
+				templateFile = TemplateFile.NOT_FOUND;
 			}
+			Map<String, Object> data = new HashMap<String, Object>();
+			data.put("app", "gt");
+			data.put("application", "gt@Oliver-ThinkPad");
+
+			String html = HtmlRender.getInstance().render(templateFile, data);
+			ServletUtil.writeString(response, html);
 		} catch (IOException e) {
 			log.error(e.getMessage(), e);
 			e.printStackTrace();
