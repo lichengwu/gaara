@@ -53,7 +53,6 @@ public class JavaVirtualMachineInfoTest extends BaseTest{
 				
 	}
 	
-	@SuppressWarnings("restriction")
     @Test
 	public void testCpuUsage() throws InterruptedException{
 		int  iCount=0;

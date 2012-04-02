@@ -189,9 +189,7 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 	private void loadCpuUsage() {
 		OperatingSystemMXBean operatingSystem = ManagementFactory.getOperatingSystemMXBean();
 		if (isOracleMBean) {
-			@SuppressWarnings("restriction")
 			final com.sun.management.OperatingSystemMXBean osBean = (com.sun.management.OperatingSystemMXBean) operatingSystem;
-			@SuppressWarnings("restriction")
 			long newProcessCpuTime = osBean.getProcessCpuTime() / 1000000;
 			this.cpuUsage = Math.min((100*(newProcessCpuTime - this.processCpuTime)
 			        / PERIOD_IN_MILLISECONDS / Runtime.getRuntime().availableProcessors()), 100);
@@ -226,7 +224,6 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 	 * @created 2012-3-23
 	 * 
 	 */
-	@SuppressWarnings("restriction")
 	private void loadMaxFileDescriptorCount() {
 		final OperatingSystemMXBean operatingSystem = ManagementFactory.getOperatingSystemMXBean();
 		if (isOracleMBeanOnUnix) {
@@ -246,7 +243,6 @@ public class JavaVirtualMachineInfo implements TransientInfo {
 	 * @created 2012-3-23
 	 * 
 	 */
-	@SuppressWarnings("restriction")
 	private void loadOpenFileDescriptorCount() {
 		final OperatingSystemMXBean operatingSystem = ManagementFactory.getOperatingSystemMXBean();
 		if (isOracleMBeanOnUnix) {
