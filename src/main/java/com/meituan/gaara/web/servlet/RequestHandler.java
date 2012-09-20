@@ -22,7 +22,9 @@ import com.meituan.gaara.collector.RemoteCollector;
 import com.meituan.gaara.collector.factory.LocalCollectorFactory;
 import com.meituan.gaara.collector.factory.RemoteCollectorFactory;
 import com.meituan.gaara.exception.GaaraException;
+import com.meituan.gaara.services.CoreServices;
 import com.meituan.gaara.store.JRobin;
+import com.meituan.gaara.sync.SyncHandler;
 import com.meituan.gaara.util.Closer;
 import com.meituan.gaara.util.FileUtil;
 import com.meituan.gaara.util.I18N;
@@ -50,6 +52,8 @@ public class RequestHandler {
 
 	private static final Log log = LogFactory.getLog(RequestHandler.class);
 
+	private static CoreServices services = new CoreServices();
+
 	public static void handle(HttpServletRequest request, HttpServletResponse response) {
 		RequestType type = RequestType.getRequestType(request.getParameter(RequestParam.TYPE
 		        .getName()));
@@ -64,7 +68,9 @@ public class RequestHandler {
 				log.error(e.getMessage(), e);
 			}
 			break;
-
+		case SYNC:
+			new SyncHandler().send(response);
+			break;
 		case PAGE:
 			handlePage(request, response);
 			break;
@@ -126,16 +132,27 @@ public class RequestHandler {
 	 */
 	private static void handlePage(HttpServletRequest request, HttpServletResponse response) {
 		try {
-			String template = request.getParameter(RequestParam.KEY.getName());
-			TemplateFile templateFile = TemplateFile.getTemplateFile(template + ".ftl");
+			String template = request.getParameter(RequestParam.KEY.getName()) + ".ftl";
+			TemplateFile templateFile = TemplateFile.getTemplateFile(template);
 			if (templateFile == null) {
 				templateFile = TemplateFile.NOT_FOUND;
 			}
-			Map<String, Object> data = new HashMap<String, Object>();
-			data.put("app", "gt");
-			data.put("application", "gt@Oliver-ThinkPad");
+			String html = null;
+			// get data from services
+			// index page
+			if (TemplateFile.INDEX.getName().equals(template)) {
+				Map<String, Object> data = new HashMap<String, Object>();
+				data.put("apps", services.index());
+				html = HtmlRender.getInstance().render(templateFile, data);
+			}
+			// app index page
+			else if (TemplateFile.APP_INDEX.getName().equals(template)) {
+				html = HtmlRender.getInstance().render(
+				        templateFile,
+				        services.showApplication(request.getParameter(RequestParam.APPLICATION
+				                .getName())));
+			}
 
-			String html = HtmlRender.getInstance().render(templateFile, data);
 			ServletUtil.writeString(response, html);
 		} catch (IOException e) {
 			log.error(e.getMessage(), e);

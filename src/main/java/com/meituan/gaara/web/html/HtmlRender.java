@@ -67,13 +67,13 @@ final public class HtmlRender {
 	 * 
 	 */
 	private void loadTemplate() {
-		StringTemplateLoader loader = new StringTemplateLoader();
-		for (TemplateFile file : TemplateFile.values()) {
-			loader.putTemplate(file.getName(),
-			        FileUtil.getResourceAsString("resources/views/" + file.getName()));
-		}
-		conf.setTemplateLoader(loader);
-		conf.setObjectWrapper(new DefaultObjectWrapper());
+//		StringTemplateLoader loader = new StringTemplateLoader();
+//		for (TemplateFile file : TemplateFile.values()) {
+//			loader.putTemplate(file.getName(),
+//			        FileUtil.getResourceAsString("resources/views/" + file.getName()));
+//		}
+//		conf.setTemplateLoader(loader);
+//		conf.setObjectWrapper(new DefaultObjectWrapper());
 	}
 
 	/**
@@ -105,6 +105,14 @@ final public class HtmlRender {
 	 */
 	public String render(TemplateFile file, Map<String, Object> data) {
 		try {
+			conf = new Configuration();
+			// TODO delete begin
+			StringTemplateLoader loader = new StringTemplateLoader();
+				loader.putTemplate(file.getName(),
+				        FileUtil.getResourceAsString("resources/views/" + file.getName()));
+			conf.setTemplateLoader(loader);
+			conf.setObjectWrapper(new DefaultObjectWrapper());
+			// TODO delete end
 			Template template = conf.getTemplate(file.getName());
 			StringWriter writer = new StringWriter();
 			template.process(data, writer);
