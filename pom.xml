@@ -5,7 +5,7 @@
 	<artifactId>gaara</artifactId>
 	<packaging>jar</packaging>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>JVM monitoring</name>
+	<name>gaara</name>
 
 	<properties>
 		<java-version>1.6</java-version>
