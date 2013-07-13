@@ -7,6 +7,8 @@ package com.meituan.gaara.web.html;
 
 import java.util.HashMap;
 
+import cn.lichengwu.gaara.web.html.HtmlRender;
+import cn.lichengwu.gaara.web.html.TemplateFile;
 import org.junit.Test;
 
 import com.meituan.gaara.test.BaseTest;

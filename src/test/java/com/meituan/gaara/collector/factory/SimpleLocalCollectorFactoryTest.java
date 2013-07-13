@@ -9,12 +9,13 @@ import java.io.Serializable;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import cn.lichengwu.gaara.collector.factory.LocalCollectorFactory;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.meituan.gaara.collector.Collector;
-import com.meituan.gaara.collector.DefaultInfoCollector;
-import com.meituan.gaara.collector.GarbageCollectorInfoCollector;
+import cn.lichengwu.gaara.collector.Collector;
+import cn.lichengwu.gaara.collector.DefaultInfoCollector;
+import cn.lichengwu.gaara.collector.GarbageCollectorInfoCollector;
 import com.meituan.gaara.test.BaseTest;
 
 

@@ -5,6 +5,7 @@
  */
 package com.meituan.gaara.util;
 
+import cn.lichengwu.gaara.util.FileUtil;
 import org.junit.Test;
 
 /**
@@ -17,7 +18,7 @@ import org.junit.Test;
 public class FileUtilTest {
 
 	/**
-	 * Test method for {@link com.meituan.gaara.util.FileUtil#getStorageDirectory(java.lang.String)}.
+	 * Test method for {@link cn.lichengwu.gaara.util.FileUtil#getStorageDirectory(java.lang.String)}.
 	 */
 	@Test
 	public void testGetStorageDirectory() {
@@ -25,7 +26,7 @@ public class FileUtilTest {
 	}
 
 	/**
-	 * Test method for {@link com.meituan.gaara.util.FileUtil#getResourcePath(java.lang.String)}.
+	 * Test method for {@link cn.lichengwu.gaara.util.FileUtil#getResourcePath(java.lang.String)}.
 	 */
 	@Test
 	public void testGetResourcePath() {
@@ -33,7 +34,7 @@ public class FileUtilTest {
 	}
 
 	/**
-	 * Test method for {@link com.meituan.gaara.util.FileUtil#getConfigPath()}.
+	 * Test method for {@link cn.lichengwu.gaara.util.FileUtil#getConfigPath()}.
 	 */
 	@Test
 	public void testGetConfigPath() {

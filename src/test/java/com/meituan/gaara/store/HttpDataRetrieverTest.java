@@ -8,6 +8,7 @@ package com.meituan.gaara.store;
 import java.io.IOException;
 import java.net.URL;
 
+import cn.lichengwu.gaara.store.HttpDataRetriever;
 import org.junit.Test;
 
 

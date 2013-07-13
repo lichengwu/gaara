@@ -7,8 +7,8 @@ package com.meituan.gaara.jvm.gc;
 
 import org.junit.Test;
 
-import com.meituan.gaara.info.GarbageCollector;
-import com.meituan.gaara.info.GarbageCollectorInfo;
+import cn.lichengwu.gaara.info.GarbageCollector;
+import cn.lichengwu.gaara.info.GarbageCollectorInfo;
 
 
 /**

@@ -9,8 +9,8 @@ import java.util.Locale;
 
 import org.junit.Before;
 
-import com.meituan.gaara.util.I18N;
-import com.meituan.gaara.util.ParameterUtil;
+import cn.lichengwu.gaara.util.I18N;
+import cn.lichengwu.gaara.util.ParameterUtil;
 
 /**
  *

@@ -5,6 +5,7 @@
  */
 package com.meituan.gaara.util;
 
+import cn.lichengwu.gaara.util.ParameterUtil;
 import org.junit.Test;
 
 import com.meituan.gaara.test.BaseTest;

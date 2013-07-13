@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import cn.lichengwu.gaara.info.JavaVirtualMachineInfo;
+import cn.lichengwu.gaara.info.ThreadDetails;
 import org.junit.Test;
 
 import com.meituan.gaara.test.BaseTest;

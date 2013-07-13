@@ -8,6 +8,7 @@ package com.meituan.gaara.util;
 
 import java.text.ParseException;
 
+import cn.lichengwu.gaara.util.I18N;
 import org.junit.Test;
 
 import com.meituan.gaara.test.BaseTest;

@@ -7,9 +7,10 @@ package com.meituan.gaara.collector;
 
 import java.util.concurrent.TimeUnit;
 
+import cn.lichengwu.gaara.collector.LocalCollectorController;
 import org.junit.Test;
 
-import com.meituan.gaara.info.MemoryInfo;
+import cn.lichengwu.gaara.info.MemoryInfo;
 import com.meituan.gaara.test.BaseTest;
 
 
